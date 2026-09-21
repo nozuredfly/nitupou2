@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F4D2B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="日報 研修生">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>作業日報（研修生）</title>
+<style>
+:root{
+  color-scheme:light;
+  --ta:#1F4D2B;        /* 稲の深緑：主色 */
+  --ta-soft:#DCE8D5;
+  --wara:#E8C547;      /* 藁：送信ボタン */
+  --tsuchi:#2E2A24;    /* 土：文字 */
+  --sora:#F1F4EE;      /* 背景 */
+  --line:#C9D2C2;
+  --alert:#B4441A;     /* 未分類・警告 */
+  --alert-soft:#F8E1D4;
+  --muted:#65655A;
+  --card:#FFFFFF;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--sora);color:var(--tsuchi);
+  font:18px/1.5 "Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
+  padding-bottom:calc(170px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--wara);outline-offset:2px}
+.top{position:sticky;top:0;z-index:5;background:var(--ta);color:#fff;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 12px}
+.top-row{display:flex;align-items:center;gap:10px;max-width:640px;margin:0 auto}
+.who{flex:1;font-size:20px;font-weight:700;background:none;border:0;text-align:left;color:#fff;padding:4px 0}
+.who small{font-weight:400;opacity:.8;font-size:14px;margin-left:6px}
+.gear{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-size:22px}
+.datebar{display:flex;align-items:center;gap:8px;max-width:640px;margin:8px auto 0}
+.datebar .nav{width:52px;height:52px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-size:22px}
+.datebox{flex:1;position:relative;height:52px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;gap:8px;font-size:21px;font-weight:700}
+.datebox input{position:absolute;inset:0;opacity:0;width:100%;height:100%;font-size:16px}
+.badge{font-size:13px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--wara);color:var(--tsuchi)}
+.badge.warn{background:var(--alert);color:#fff}
+main{max-width:640px;margin:0 auto;padding:4px 12px}
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.blk h2{font-size:17px;margin:0 0 10px;color:var(--ta)}
+.banner{background:var(--alert-soft);border:2px solid var(--alert);border-radius:14px;padding:12px 14px;margin:12px 0;display:flex;align-items:center;gap:10px;font-weight:700}
+.banner span{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:48px;padding:0 16px;border-radius:24px;border:2px solid var(--line);background:#fff;font-size:17px;font-weight:600}
+.chip.on{background:var(--ta);border-color:var(--ta);color:#fff}
+.chip.alert.on{background:var(--alert);border-color:var(--alert)}
+.chip.ghost{border-style:dashed;color:var(--muted)}
+.btn{min-height:56px;border-radius:12px;font-size:18px;font-weight:700;border:2px solid var(--ta);background:#fff;color:var(--ta);padding:0 16px}
+.btn.full{width:100%}
+.btn.solid{background:var(--ta);color:#fff}
+.btn.small{min-height:44px;font-size:16px;padding:0 12px}
+.btn.alert{border-color:var(--alert);color:var(--alert)}
+.attline{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:56px;border:2px solid var(--line);border-radius:12px;background:#fff;padding:0 14px;font-size:19px;font-weight:700}
+.attline span{white-space:nowrap}
+.attline em{font-style:normal;font-size:14px;color:var(--ta);text-align:right;line-height:1.3}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+label.f{min-width:0}
+label.f{display:block;font-size:14px;color:var(--muted);font-weight:600}
+input[type=time]{display:block;width:100%;min-width:0;max-width:100%;min-height:56px;font-size:22px;font-weight:700;border:2px solid var(--line);border-radius:12px;padding:0 10px;background:#fff;color:var(--tsuchi);margin-top:4px}
+textarea{width:100%;min-height:80px;font:inherit;font-size:17px;border:2px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;background:#fff;color:var(--tsuchi)}
+.gap10{height:10px}
+/* 1日の帯：このアプリの要 */
+.tlwrap{margin-top:4px}
+.tl{position:relative;height:46px;border-radius:8px;background:#E4E8DF;overflow:hidden}
+.seg{position:absolute;top:0;bottom:0}
+.seg.work{background:var(--ta)}
+.seg.gap{background:repeating-linear-gradient(135deg,var(--alert) 0 7px,#D5774E 7px 14px)}
+.seg.deduct{background:#B8BEB0}
+.seg.paid{background:#A8C49A}
+.seg.outside{background:#7C8C98}
+.seg.trip{background:repeating-linear-gradient(90deg,#B8BEB0 0 10px,#CFD4C8 10px 20px)}
+.gtitle{margin:12px 0 6px;font-size:15px;font-weight:700;color:var(--muted)}
+.gtitle:first-child{margin-top:0}
+.breaks{margin-top:12px;padding:14px;border-radius:12px;background:var(--sora)}
+.btitle{margin:0 0 8px;font-size:17px;font-weight:700;color:var(--ta)}
+.brow{margin-top:10px}
+.blabel{margin:0 0 6px;font-size:17px;font-weight:700}
+.blabel span{margin-left:8px;font-size:14px;font-weight:600;color:var(--muted)}
+.bmin{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.bmin .chip{min-height:48px;padding:0 4px;font-size:16px}
+.tripq{margin-top:12px;padding:12px;border-radius:12px;background:var(--sora);border:2px solid transparent}
+.tripq.need{border-color:var(--alert);background:var(--alert-soft)}
+.tripq>b{display:block;font-size:18px;margin-bottom:8px}
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.yn .chip{min-height:56px;font-size:19px}
+.leg{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.leg-h{display:flex;align-items:center;justify-content:space-between}
+.leg-h b{color:var(--ta)}
+.leg-row{display:block}
+.mins{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}.mins .chip{min-height:48px;padding:0 4px;font-size:15px}
+.tripq .btn{margin-top:12px}
+.bnotice{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--wara);color:var(--tsuchi);font-size:20px;font-weight:800;line-height:1.4}
+.bnotice small{display:block;margin-top:4px;font-size:14px;font-weight:600}
+.tripnote{margin:10px 0 0;font-size:14px;color:var(--muted)}
+.ticks{position:relative;height:20px;font-size:12px;color:var(--muted);margin-top:2px}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{text-align:center;padding:6px 2px;border-radius:10px;background:var(--sora)}
+.stat b{display:block;font-size:22px;line-height:1.2}
+.stat small{font-size:13px;color:var(--muted)}
+.stat.bad{background:var(--alert-soft)}
+.stat.bad b{color:var(--alert)}
+.ot{margin:12px 0 0;padding:12px 14px;border-radius:12px;background:#FFF3C4;font-size:19px;font-weight:700}
+.ot span{display:block;margin-top:4px;font-size:14px;font-weight:600;color:var(--muted)}
+.warns{margin:10px 0 0;padding:0;list-style:none;font-size:15px;color:var(--alert);font-weight:600}
+.warns li{margin-top:4px}
+/* 作業カード */
+.card{border:2px solid var(--line);border-radius:14px;padding:12px;margin:0 0 12px;background:#fff}
+.card-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.card-h .n{font-weight:800;color:var(--ta);font-size:18px}
+.card-h .d{flex:1;font-size:15px;color:var(--muted)}
+.del{min-height:40px;border:0;background:none;color:var(--muted);font-size:15px;text-decoration:underline}
+.pick{display:flex;align-items:center;gap:8px;width:100%;min-height:56px;border:2px solid var(--line);border-radius:12px;background:#fff;padding:6px 14px;font-size:19px;font-weight:700;text-align:left;margin-bottom:10px}
+.pick.empty{color:var(--muted);font-weight:600;border-style:dashed}
+.times{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:end;margin-top:10px}
+.times .sep{padding-bottom:14px;color:var(--muted)}
+details.memo{margin-top:8px}
+details.memo summary{min-height:40px;display:flex;align-items:center;color:var(--muted);font-size:15px}
+.addtask{width:100%;min-height:60px;border:2px dashed var(--ta);border-radius:14px;background:transparent;color:var(--ta);font-size:19px;font-weight:700}
+.fold{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:52px;border:0;background:none;padding:0;font-size:17px;font-weight:700;color:var(--ta);text-align:left}
+.fold span{color:var(--tsuchi);font-weight:600;font-size:16px}
+/* 固定フッター */
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:6;background:rgba(241,244,238,.97);border-top:1px solid var(--line);
+  padding:8px 14px calc(10px + env(safe-area-inset-bottom))}
+.foot-in{max-width:640px;margin:0 auto}
+.sendstat{font-size:14px;min-height:22px;margin-bottom:6px;display:flex;align-items:center;gap:8px;color:var(--muted)}
+.sendstat.ok{color:var(--ta);font-weight:700}
+.sendstat.wait{color:var(--alert);font-weight:700}
+.sendstat button{margin-left:auto}
+.send{width:100%;min-height:64px;border:0;border-radius:14px;background:var(--wara);color:var(--tsuchi);font-size:21px;font-weight:800;box-shadow:0 2px 0 #B8962A}
+.send:active{transform:translateY(1px);box-shadow:none}
+.send[disabled]{opacity:.6}
+.linebtn{width:100%;min-height:44px;margin-top:6px;border:0;background:none;color:var(--muted);font-size:15px;text-decoration:underline}
+/* シート */
+.sheet-bg{position:fixed;inset:0;background:rgba(20,25,18,.45);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:88vh;overflow:auto;background:#fff;border-radius:18px 18px 0 0;
+  padding:16px 16px calc(16px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.sheet-in{max-width:640px;margin:0 auto}
+.sheet h3{margin:0 0 12px;font-size:19px}
+.cattabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;position:sticky;top:-16px;background:#fff;padding:4px 0 8px;z-index:1}
+.cattab{min-height:52px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:17px;font-weight:700;position:relative}
+.cattab.on{background:var(--ta);border-color:var(--ta);color:#fff}
+.cattab i{position:absolute;top:-6px;right:-4px;min-width:22px;height:22px;border-radius:11px;background:var(--wara);color:var(--tsuchi);font-style:normal;font-size:13px;line-height:22px}
+.zone{margin:14px 0 6px;display:flex;align-items:center;justify-content:space-between}
+.zone b{font-size:16px;color:var(--ta)}
+.sheet-foot{position:sticky;bottom:calc(-16px - env(safe-area-inset-bottom));background:#fff;padding:12px 0 4px;margin-top:12px}
+.whobtn{display:block;width:100%;min-height:60px;margin:8px 0;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:20px;font-weight:700;text-align:left;padding:0 16px}
+.whobtn small{font-weight:400;color:var(--muted);font-size:14px;margin-left:8px}
+.kv{font-size:14px;color:var(--muted);margin:6px 0}
+.toast{position:fixed;left:50%;bottom:calc(180px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;
+  background:var(--tsuchi);color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;font-weight:700;max-width:90vw;text-align:center}
+.hide{display:none!important}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+</style>
+</head>
+<body>
+<header class="top" id="top"></header>
+<main id="main"></main>
+<footer class="foot"><div class="foot-in" id="foot"></div></footer>
+<div id="sheetRoot"></div>
+<div id="toast" class="toast hide" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   作業日報 v2  — 入力はシンプル、裏側は精密
+   ・勤怠時間／作業実績時間／未分類時間を1分単位の集合で計算
+   ・日報は全員が自分の分を提出（共同作業者は照合用の参考データ）
+   ・outbox＋revision＋reportId で二重登録を防止
+   ===================================================================== */
+const APP_VERSION = '2.2.0-trainee';
+const LS = 'nippoT:';   // 同じ github.io 上の他アプリと保存領域を分ける
+
+/* ---------- 会社設定の初期値（config.json があれば上書き） ---------- */
+const DEFAULT_CONFIG = {
+  version: 'builtin-2026-09-20',
+  companyName: 're:zenith 新鮮組',
+  gasUrl: '',
+  unclassWarnMin: 15,
+  fillMaxMin: 30,      // これより長い空きは「移動・準備」で自動では埋めない
+  // 遠方（車で移動）：研修生は行き・帰りの移動時間を休憩として扱う。一般作業員（運転）は作業時間（移動・準備）
+  // 車移動の数え方（研修生）
+  //   mode 'work'    : 移動時間は労働時間（作業時間）として記録し、休憩にはしない ← 現在の会社ルール
+  //   mode 'add'     : 移動時間をすべて休憩として、通常の休憩に追加
+  //   mode 'replace' : replaceBreaks の休憩をなくし、移動時間をすべて休憩に
+  //   mode 'partial' : partial.breakName の休憩のうち travelMin 分を移動中に取ったことにする（残りの移動は作業時間）
+  trip: { legMin: 20, mode: 'work', replaceBreaks: [], partial: { breakName: '午後休憩', travelMin: 20, fromLeg: 'last' } },
+  closingDay: 15,
+  schedules: {
+    normal: { label: '通常勤務', label_id: 'Normal', start: '08:00', end: '17:00', breaks: [
+      { name: '午前休憩', s: '10:00', e: '10:30', rule: { trainee: { type: 'deduct' }, general: { type: 'paid', min: 15 } } },
+      { name: '昼休憩',   s: '12:00', e: '13:00', rule: { trainee: { type: 'deduct' }, general: { type: 'deduct' } } },
+      { name: '午後休憩', s: '15:00', e: '15:30', rule: { trainee: { type: 'deduct' }, general: { type: 'paid', min: 15 } } }
+    ]},
+    summer: { label: 'サマータイム', label_id: 'Musim panas', start: '05:00', end: '14:00', breaks: [
+      { name: '午前休憩', s: '07:00', e: '07:30', rule: { trainee: { type: 'deduct' }, general: { type: 'paid', min: 15 } } },
+      { name: '昼休憩',   s: '09:00', e: '10:00', rule: { trainee: { type: 'deduct' }, general: { type: 'deduct' } } },
+      { name: '午後休憩', s: '12:00', e: '12:30', rule: { trainee: { type: 'deduct' }, general: { type: 'paid', min: 15 } } }
+    ]}
+  },
+  workers: [
+    { id: 'W001', name: '野副', type: 'general' },
+    { id: 'W002', name: '田中', type: 'general' },
+    { id: 'W003', name: 'ブディ', type: 'trainee' }
+  ],
+  // 残業：終業時刻を過ぎた分を、30分単位で切り上げ（夕方の休憩なし）
+  overtime: { unit: 30, round: 'ceil' },
+  // その日に選べる休憩（設定_休憩 の休憩名と合わせる）
+  breakPicker: { am: '午前休憩', pm: '午後休憩', options: [15, 20, 30, 0], default: { trainee: 30, general: 15 } },
+  // 場所の種類（タブ）。fields の cat と同じ名前にする。cat が無い場所は「圃場」
+  fieldCats: [
+    { id: '圃場', label: '圃場', label_id: 'Sawah', icon: '🌾' },
+    { id: 'ハウス', label: 'ハウス', label_id: 'Rumah kaca', icon: '🏠' },
+    { id: '倉庫', label: '倉庫', label_id: 'Gudang', icon: '🏚' }
+  ],
+  fields: [
+    { id: 'F-S1', name: '南1', zone: '南', area: 30 }, { id: 'F-S2', name: '南2', zone: '南', area: 30 },
+    { id: 'F-S3', name: '南3', zone: '南', area: 25 }, { id: 'F-S4', name: '南4', zone: '南', area: 25 },
+    { id: 'F-S5', name: '南5', zone: '南', area: 40 }, { id: 'F-N1', name: '北1', zone: '北', area: 30 },
+    { id: 'F-N2', name: '北2', zone: '北', area: 30 }, { id: 'F-E1', name: '東1', zone: '東', area: 20 },
+    { id: 'H-01', name: 'ハウス1', cat: 'ハウス', zone: 'ハウス', area: 5 }, { id: 'H-02', name: 'ハウス2', cat: 'ハウス', zone: 'ハウス', area: 5 },
+    { id: 'P-WACHI', name: '和地倉庫', cat: '倉庫', zone: '和地', area: 0 }
+  ],
+  tasks: [
+    { id: 'T01', name: '稲刈り', name_id: 'Panen padi' },
+    { id: 'T02', name: '田植え', name_id: 'Tanam padi' },
+    { id: 'T03', name: '代かき', name_id: 'Meratakan sawah' },
+    { id: 'T04', name: '耕起', name_id: 'Membajak' },
+    { id: 'T05', name: '草刈り', name_id: 'Potong rumput' },
+    { id: 'T06', name: '水管理', name_id: 'Mengatur air' },
+    { id: 'T07', name: '防除', name_id: 'Penyemprotan' },
+    { id: 'T08', name: '施肥', name_id: 'Pemupukan' },
+    { id: 'T09', name: '乾燥調製', name_id: 'Pengeringan' },
+    { id: 'T10', name: '野菜管理', name_id: 'Perawatan sayur' },
+    { id: 'T12', name: '機械整備', name_id: 'Perawatan mesin' },
+    { id: 'T90', name: '移動・準備', name_id: 'Pindah/Persiapan', noField: true, filler: true },
+    { id: 'T99', name: 'その他', name_id: 'Lainnya' }
+  ]
+};
+
+/* ---------- 言語 ---------- */
+const INC_TYPES = ['damage', 'machine', 'fieldchg', 'otherrep'];   // 会社への報告の種類
+const I18N = {
+  ja: {
+    today:'今日', notToday:'今日ではありません', status_normal:'通常', status_late:'遅刻', status_early:'早退', status_absent:'欠勤',
+    work_hours:'勤務', edit:'変更', in:'出勤', out:'退勤', reason:'理由', attend:'勤怠', work:'作業', unclass:'未分類',
+    day:'今日の勤務', tasks:'今日の作業', addTask:'＋ 作業を追加', pickPlace:'場所を選ぶ', more:'他の作業', less:'閉じる',
+    start:'開始', end:'終了', memo:'メモ', del:'削除', task:'作業', coworkers:'一緒に作業した人', none:'なし',
+    sameAsLast:'前回と同じ', report:'会社への報告', damage:'物損事故', machine:'機械トラブル', fieldchg:'圃場の変化', otherrep:'その他', ph_fieldchg:'どの圃場で、何が変わったか（水・畦・倒伏・病害虫・獣害など）', ph_otherrep:'会社に伝えたいこと', whatHappened:'何が起きたか、どう対応したか',
+    send:'今日の日報を送信', resend:'修正して再送信', sentOk:'送信しました', sentState:'送信済み', pendingState:'送信待ち',
+    autoRetry:'電波が戻ると自動で送ります', changed:'変更あり・再送信してください', line:'LINEで送る（予備）',
+    fillGap:'30分以内の空きを「移動・準備」で埋める', warnOverlap:'作業時間が{d}重なっています',
+    warnOutside:'勤務時間外の作業が{d}あります（勤怠には入りません）', warnBreak:'休憩時間中の作業が{d}あります（作業時間に入りません）',
+    warnUnclass:'記録のない時間が{d}あります', errNoTask:'作業を1つ以上入力してください', errType:'作業{n}の作業内容を選んでください',
+    errPlace:'作業{n}の場所を選んでください', errTime:'作業{n}の開始・終了時刻を確認してください', errAtt:'出勤・退勤の時刻を確認してください',
+    errWho:'名前を選んでください', confirmUnclass:'記録のない時間が{d}あります。このまま送信しますか？',
+    noChange:'変更がないため送信しませんでした', queued:'送信待ちに入れました', noUrl:'送信先が未設定です（config.json の gasUrl）',
+    unsentDay:'{d} の日報が未送信です', open:'開く', whoAreYou:'あなたの名前を選んでください', settings:'設定', changeName:'名前を変更',
+    lang:'言語', reloadCfg:'会社設定を再読込', retryNow:'今すぐ再送', done:'決定', zoneAll:'区域全部', frequent:'よく使う',
+    close:'閉じる', schedule:'勤務形態', trainee:'研修生', general:'一般作業員', cfgLoaded:'スプレッドシートの設定を読み込みました', cfgSheet:'設定：スプレッドシート', cfgFileSrc:'設定：config.json', cfgFail:'会社設定を読み込めませんでした（前回の設定で動きます）',
+    storageFull:'端末の保存領域がいっぱいです', unknownPlace:'（登録外）', minU:'分', hourU:'時間', rev:'第{n}版', otherPending:'他に送信待ち {n}件',
+    recorded:'計上', breaks:'今日の休憩', overtime:'残業', otNote:'{f}〜{o}（実際は{r}分。{u}分単位で切り上げ）', noBreak:'なし', breakNotice:'今日の{b}は {n}分（{s}〜{e}）です', breakNone:'今日は現場での{b}はありません', breakSub:'いつもは{o}分。{c}分は車の中で休憩した扱いです', tripPartial:'移動のうち{n}分を「{b}」として扱います。残りの移動は作業時間です', tripQ:'今日、車で移動しましたか？', yes:'はい', no:'いいえ', depart:'出発', legMove:'移動', legAdd:'＋ 移動を追加', driver:'運転した人', errTripQ:'「車で移動しましたか？」に答えてください', warnTripOut:'勤務時間外の移動が{d}あります', title:'作業日報（研修生）', trip:'遠方（車で移動）', tripOut:'行き', tripBack:'帰り', tripOneWay:'片道{n}分', tripTrainee:'移動時間は労働時間（作業時間）として記録します', tripDriver:'運転は作業時間（移動・準備）として記録します', legendTrip:'車移動', errTrip:'車移動の出発時刻を確認してください', legendWork:'作業', legendBreak:'休憩（引く）', legendPaid:'休憩（引かない）', legendGap:'未分類', legendOut:'計上外', absentNote:'欠勤の連絡事項'
+  },
+  id: {
+    today:'Hari ini', notToday:'Bukan hari ini', status_normal:'Normal', status_late:'Terlambat', status_early:'Pulang awal', status_absent:'Tidak masuk',
+    work_hours:'Jam kerja', edit:'Ubah', in:'Masuk', out:'Pulang', reason:'Alasan', attend:'Hadir', work:'Kerja', unclass:'Belum dicatat',
+    day:'Kerja hari ini', tasks:'Pekerjaan hari ini', addTask:'＋ Tambah pekerjaan', pickPlace:'Pilih lokasi', more:'Lainnya', less:'Tutup',
+    start:'Mulai', end:'Selesai', memo:'Catatan', del:'Hapus', task:'Kerja', coworkers:'Rekan kerja', none:'Tidak ada',
+    sameAsLast:'Sama seperti sebelumnya', report:'Laporan ke kantor', damage:'Kerusakan barang', machine:'Masalah mesin', fieldchg:'Perubahan sawah', otherrep:'Lainnya', ph_fieldchg:'Sawah mana dan apa yang berubah (air, pematang, padi rebah, hama, hewan, dll.)', ph_otherrep:'Hal yang ingin disampaikan ke kantor', whatHappened:'Apa yang terjadi dan apa tindakannya',
+    send:'Kirim laporan hari ini', resend:'Kirim ulang perubahan', sentOk:'Terkirim', sentState:'Terkirim', pendingState:'Menunggu kirim',
+    autoRetry:'Akan dikirim otomatis saat sinyal kembali', changed:'Ada perubahan, kirim ulang', line:'Kirim lewat LINE (cadangan)',
+    fillGap:'Isi waktu kosong ≤30 menit dengan "Pindah/Persiapan"', warnOverlap:'Waktu kerja tumpang tindih {d}',
+    warnOutside:'Ada kerja di luar jam kerja {d} (tidak dihitung hadir)', warnBreak:'Ada kerja saat istirahat {d} (tidak dihitung)',
+    warnUnclass:'Ada waktu belum dicatat {d}', errNoTask:'Masukkan minimal 1 pekerjaan', errType:'Pilih jenis pekerjaan {n}',
+    errPlace:'Pilih lokasi pekerjaan {n}', errTime:'Periksa jam mulai/selesai pekerjaan {n}', errAtt:'Periksa jam masuk/pulang',
+    errWho:'Pilih nama Anda', confirmUnclass:'Ada waktu belum dicatat {d}. Tetap kirim?',
+    noChange:'Tidak ada perubahan, tidak dikirim', queued:'Masuk antrean kirim', noUrl:'Tujuan kirim belum diatur (gasUrl)',
+    unsentDay:'Laporan {d} belum terkirim', open:'Buka', whoAreYou:'Pilih nama Anda', settings:'Pengaturan', changeName:'Ganti nama',
+    lang:'Bahasa', reloadCfg:'Muat ulang pengaturan', retryNow:'Kirim ulang sekarang', done:'Selesai', zoneAll:'Semua area', frequent:'Sering dipakai',
+    close:'Tutup', schedule:'Jadwal', trainee:'Magang', general:'Pekerja umum', cfgLoaded:'Pengaturan dari spreadsheet dimuat', cfgSheet:'Pengaturan: spreadsheet', cfgFileSrc:'Pengaturan: config.json', cfgFail:'Gagal memuat pengaturan (pakai yang lama)',
+    storageFull:'Memori HP penuh', unknownPlace:'(tidak terdaftar)', minU:' menit', hourU:' jam ', rev:'versi {n}', otherPending:'{n} lainnya menunggu kirim',
+    recorded:'dihitung', breaks:'Istirahat hari ini', overtime:'Lembur', otNote:'{f}–{o} (sebenarnya {r} menit, dibulatkan ke atas per {u} menit)', noBreak:'Tidak ada', breakNotice:'Istirahat sore hari ini {n} menit ({s}–{e})', breakNone:'Hari ini tidak ada istirahat sore di lokasi', breakSub:'Biasanya {o} menit. {c} menit dihitung istirahat di mobil', tripPartial:'{n} menit perjalanan dihitung sebagai istirahat sore. Sisa perjalanan dihitung kerja', tripQ:'Hari ini naik mobil ke lokasi?', yes:'Ya', no:'Tidak', depart:'Berangkat', legMove:'Perjalanan', legAdd:'＋ Tambah perjalanan', driver:'Yang menyetir', errTripQ:'Jawab pertanyaan "naik mobil"', warnTripOut:'Ada perjalanan di luar jam kerja {d}', title:'Laporan Kerja (Magang)', trip:'Jauh (naik mobil)', tripOut:'Pergi', tripBack:'Pulang', tripOneWay:'Sekali jalan {n} menit', tripTrainee:'Waktu perjalanan dihitung sebagai jam kerja', tripDriver:'Menyetir dicatat sebagai kerja (Pindah/Persiapan)', legendTrip:'Naik mobil', errTrip:'Periksa jam berangkat mobil', legendWork:'Kerja', legendBreak:'Istirahat (dipotong)', legendPaid:'Istirahat (tidak dipotong)', legendGap:'Belum dicatat', legendOut:'Tidak dihitung', absentNote:'Keterangan tidak masuk'
+  }
+};
+let LANG = 'id';
+function t(k, vars) { let s = (I18N[LANG] && I18N[LANG][k]) || I18N.ja[k] || k; if (vars) for (const v in vars) s = s.replace('{' + v + '}', vars[v]); return s; }
+
+/* ---------- 小道具 ---------- */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const toMin = s => { if (typeof s !== 'string' || !/^\d{1,2}:\d{2}$/.test(s)) return null; const [h, m] = s.split(':').map(Number); if (h > 23 || m > 59) return null; return h * 60 + m; };
+const toHM = m => `${Math.floor(m / 60)}:${pad(m % 60)}`;
+const fmtDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayStr = () => fmtDate(new Date());
+const addDays = (ds, n) => { const [y, m, d] = ds.split('-').map(Number); return fmtDate(new Date(y, m - 1, d + n)); };
+function dur(m) { m = Math.max(0, Math.round(m)); const h = Math.floor(m / 60), r = m % 60; if (!h) return r + t('minU'); return h + t('hourU') + (r ? r + t('minU') : ''); }
+function dateLabel(ds) { const [y, m, d] = ds.split('-').map(Number); const w = new Date(y, m - 1, d).getDay();
+  const wk = LANG === 'id' ? ['Min','Sen','Sel','Rab','Kam','Jum','Sab'][w] : '日月火水木金土'[w];
+  return LANG === 'id' ? `${d}/${m} (${wk})` : `${m}月${d}日（${wk}）`; }
+function uid() { try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) {} return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12); }
+function hash(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+let toastTimer;
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.remove('hide'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add('hide'), 2600); }
+
+/* ---------- 保存（壊れていても止まらない） ---------- */
+const store = {
+  get(k, def) { try { const v = localStorage.getItem(LS + k); return v == null ? def : JSON.parse(v); } catch (e) { return def; } },
+  set(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); return true; } catch (e) { toast(t('storageFull')); return false; } },
+  del(k) { try { localStorage.removeItem(LS + k); } catch (e) {} },
+  keys(prefix) { const out = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(LS + prefix)) out.push(k.slice(LS.length)); } } catch (e) {} return out; }
+};
+
+/* ---------- 会社設定 ---------- */
+function validConfig(c) { return c && typeof c === 'object' && Array.isArray(c.workers) && Array.isArray(c.fields) && Array.isArray(c.tasks) && c.workers.every(w => w && w.id) && c.fields.every(f => f && f.id) && c.tasks.every(x => x && x.id); }
+function mergeConfig(c) {
+  const base = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  if (!validConfig(c)) { if (c && typeof c.gasUrl === 'string') base.gasUrl = c.gasUrl; return base; }
+  const out = Object.assign(base, c);
+  out.schedules = Object.assign({}, DEFAULT_CONFIG.schedules, c.schedules || {});
+  if (!out.schedules.normal) out.schedules.normal = DEFAULT_CONFIG.schedules.normal;
+  return out;
+}
+let CFG = mergeConfig(store.get('config', null));
+/* 設定の読み込み順
+   1. config.json（送信先URLと、スプレッドシートが使えない時の予備）
+   2. スプレッドシートの設定シート（GAS経由）← こちらが優先
+   どちらも読めない時は、前回の設定のまま動く */
+let cfgLoadedAt = 0;
+async function loadConfig(manual) {
+  cfgLoadedAt = Date.now();
+  let boot = null;
+  try { const r = await fetch('config.json?ts=' + Date.now(), { cache: 'no-store' }); if (r.ok) boot = await r.json(); } catch (e) {}
+  const gasUrl = (boot && typeof boot.gasUrl === 'string' && boot.gasUrl) || CFG.gasUrl;
+  let sheet = null;
+  if (gasUrl && navigator.onLine !== false) {
+    try {
+      const ctrl = new AbortController(); const tm = setTimeout(() => ctrl.abort(), 20000);
+      const r = await fetch(gasUrl + (gasUrl.includes('?') ? '&' : '?') + 'action=config&ts=' + Date.now(), { signal: ctrl.signal, redirect: 'follow' });
+      clearTimeout(tm);
+      const j = await r.json();
+      if (j && j.ok && validConfig(j.config)) sheet = j.config;
+    } catch (e) {}
+  }
+  let next = null;
+  if (sheet) next = Object.assign({}, validConfig(boot) ? boot : {}, sheet, { gasUrl, source: 'sheet' });
+  else if (validConfig(boot)) { const cur = store.get('config', null); next = (cur && cur.source === 'sheet' && validConfig(cur)) ? Object.assign(cur, { gasUrl }) : Object.assign({}, boot, { source: 'file' }); }
+  else { const cur = store.get('config', null); if (cur) next = Object.assign(cur, { gasUrl }); else if (gasUrl) next = { gasUrl }; }
+  if (next) {
+    const changed = JSON.stringify(next) !== JSON.stringify(store.get('config', null));
+    store.set('config', next); CFG = mergeConfig(next);
+    if (manual) toast(sheet ? t('cfgLoaded') : t('cfgFail'));
+    if (changed || manual) { render(); if (UI.sheet) renderSheet(); }
+  } else if (manual) toast(t('cfgFail'));
+}
+const workerById = id => CFG.workers.find(w => w.id === id) || null;
+const fieldById = id => CFG.fields.find(f => f.id === id) || null;
+function breakPicker() { const b = CFG.breakPicker || {}; return { am: b.am || '午前休憩', pm: b.pm || '午後休憩',
+  options: Array.isArray(b.options) && b.options.length ? b.options : [15, 20, 30, 0], default: b.default || { trainee: 30, general: 15 } }; }
+function defaultBreakMin(type) { const d = breakPicker().default; const v = Number(d[type === 'trainee' ? 'trainee' : 'general']); return isFinite(v) ? v : (type === 'trainee' ? 30 : 15); }
+const catOf = f => (f && f.cat) || '圃場';
+function fieldCats() {   // 設定にあるタブ＋場所に書かれているのに設定に無い種類も自動で出す
+  const list = Array.isArray(CFG.fieldCats) && CFG.fieldCats.length ? CFG.fieldCats.slice() : [{ id: '圃場', label: '圃場', icon: '🌾' }];
+  CFG.fields.forEach(f => { const c = catOf(f); if (!list.some(x => x.id === c)) list.push({ id: c, label: c, icon: '📍' }); });
+  return list.filter(c => CFG.fields.some(f => catOf(f) === c.id));
+}
+const catLabel = c => c ? (LANG === 'id' && c.label_id ? c.label_id : c.label) : '';
+const catIcon = id => (fieldCats().find(c => c.id === id) || {}).icon || '📍';
+const taskById = id => CFG.tasks.find(x => x.id === id) || null;
+const taskName = x => x ? (LANG === 'id' && x.name_id ? x.name_id : x.name) : '';
+const schedLabel = s => s ? (LANG === 'id' && s.label_id ? s.label_id : s.label) : '';
+const fillerTask = () => CFG.tasks.find(x => x.filler) || null;
+
+/* ---------- 下書き ---------- */
+let ME = store.get('worker', null);
+let D = null;                 // 表示中の日報
+const UI = { attOpen: false, coOpen: false, more: {}, sheet: null };
+
+const draftKey = (date, wid) => `draft:${date}:${wid}`;
+function newDraft(date, wid) {
+  const sk = CFG.schedules[store.get('lastSchedule', 'normal')] ? store.get('lastSchedule', 'normal') : 'normal';
+  const sch = CFG.schedules[sk];
+  return { v: 2, reportId: uid(), date, workerId: wid, schedule: sk,
+    attendance: { status: 'normal', in: sch.start, out: sch.end }, statusNote: '',
+    coworkers: [], tasks: [], breaks: { am: null, pm: null }, trip: { answered: false, on: false, legs: [], driverId: '' }, incOn: { damage: false, machine: false, fieldchg: false, otherrep: false }, incidents: { damage: '', machine: '', fieldchg: '', otherrep: '' },
+    revision: 0, confirmedRevision: 0, sentHash: '', dirty: false, updatedAt: Date.now() };
+}
+function normalizeDraft(d, date, wid) {
+  if (!d || typeof d !== 'object' || d.v !== 2 || !d.reportId) return newDraft(date, wid);
+  const n = newDraft(date, wid);
+  const out = Object.assign(n, d);
+  out.date = date; out.workerId = wid;
+  if (!CFG.schedules[out.schedule]) out.schedule = 'normal';
+  out.attendance = Object.assign({ status: 'normal', in: '', out: '' }, typeof d.attendance === 'object' ? d.attendance : {});
+  if (!['normal','late','early','absent'].includes(out.attendance.status)) out.attendance.status = 'normal';
+  const bpick = (d.breaks && typeof d.breaks === 'object') ? d.breaks : {};
+  const okMin = v => { const n = Number(v); return isFinite(n) && n >= 0 && n <= 120 ? n : null; };
+  out.breaks = { am: okMin(bpick.am), pm: okMin(bpick.pm) };
+  out.coworkers = Array.isArray(d.coworkers) ? d.coworkers.filter(x => typeof x === 'string') : [];
+  out.tasks = (Array.isArray(d.tasks) ? d.tasks : []).filter(x => x && typeof x === 'object').map(x => ({
+    id: x.id || uid(), typeId: typeof x.typeId === 'string' ? x.typeId : null,
+    fieldIds: Array.isArray(x.fieldIds) ? x.fieldIds.filter(f => typeof f === 'string') : [],
+    start: typeof x.start === 'string' ? x.start : '', end: typeof x.end === 'string' ? x.end : '', note: typeof x.note === 'string' ? x.note : '' }));
+  const tr = (d.trip && typeof d.trip === 'object') ? d.trip : {};
+  out.trip = { answered: !!tr.answered, on: !!tr.on, driverId: typeof tr.driverId === 'string' ? tr.driverId : '',
+    legs: (Array.isArray(tr.legs) ? tr.legs : []).filter(l => l && typeof l === 'object').map(l => ({ id: l.id || uid(), start: typeof l.start === 'string' ? l.start : '', min: Number(l.min) || legDefault() })) };
+  out.incOn = Object.assign({ damage: false, machine: false, fieldchg: false, otherrep: false }, d.incOn || {});
+  out.incidents = Object.assign({ damage: '', machine: '', fieldchg: '', otherrep: '' }, d.incidents || {});
+  out.revision = Number(d.revision) || 0; out.confirmedRevision = Number(d.confirmedRevision) || 0;
+  return out;
+}
+function loadDraft(date) { D = normalizeDraft(store.get(draftKey(date, ME), null), date, ME); UI.more = {}; }
+function persist() { D.updatedAt = Date.now(); store.set(draftKey(D.date, D.workerId), D); }
+function edited() { D.dirty = true; persist(); }
+function hasContent(d) { return d.tasks.length > 0 || (d.trip && d.trip.on) || d.attendance.status !== 'normal' || INC_TYPES.some(k => d.incOn[k]); }
+function contentOf(d) { return JSON.stringify([d.schedule, d.attendance, d.statusNote, d.coworkers.slice().sort(),
+  d.breaks, d.tasks.map(x => [x.typeId, x.fieldIds.slice().sort(), x.start, x.end, x.note]), [d.trip.answered, d.trip.on, d.trip.on ? d.trip.legs.map(l => [l.start, l.min]) : 0, d.trip.driverId], INC_TYPES.map(k => d.incOn[k] ? [k, d.incidents[k]] : 0)]); }
+function cleanupOldDrafts() {
+  const limit = addDays(todayStr(), -60);
+  store.keys('draft:').forEach(k => { const d = store.get(k, null); const date = k.split(':')[1];
+    if (!d || typeof d !== 'object') { store.del(k); return; }
+    if (date < limit && !d.dirty) store.del(k); });
+}
+function unsentDrafts() {
+  if (!ME) return [];
+  return store.keys('draft:').filter(k => k.endsWith(':' + ME)).map(k => store.get(k, null))
+    .filter(d => d && d.v === 2 && d.dirty && d.date !== D.date && hasContent(normalizeDraft(d, d.date, ME)))
+    .sort((a, b) => a.date < b.date ? -1 : 1);
+}
+
+/* =====================================================================
+   時間計算：1日を1440分の配列として扱う
+   A[m]  0=勤務外 1=勤務 2=控除休憩 3=有給休憩
+   cover[m] = その分を含む作業カードの数
+   ===================================================================== */
+function breakMarks(sch, type, d) {
+  const onTrip = !!(d && d.trip && d.trip.on && type === 'trainee' && tripLegs(d).length);
+  const mode = tripMode();
+  const rep = (onTrip && mode === 'replace' && Array.isArray(CFG.trip.replaceBreaks)) ? CFG.trip.replaceBreaks : [];
+  const part = (onTrip && mode === 'partial') ? CFG.trip.partial : null;
+  const bp = breakPicker(); const pick = (d && d.breaks) || {};
+  const out = [];
+  (sch.breaks || []).filter(b => !rep.includes(b.name)).forEach(b => {
+    const r = (b.rule && b.rule[type]) || { type: 'deduct' };
+    let s = toMin(b.s), e = toMin(b.e);
+    const chosen = b.name === bp.am ? pick.am : b.name === bp.pm ? pick.pm : null;   // その日に選んだ長さ
+    if (chosen != null && s != null) { if (Number(chosen) <= 0) return; e = s + Number(chosen); }
+    if (part && b.name === part.breakName && s != null && e != null) e = s + Math.max(0, (e - s) - tripSplit(d).breakMin);   // 移動中に取った分だけ現場の休憩を短く
+    if (s == null || e == null || e <= s || r.type === 'none') return;
+    if (r.type === 'paid') {
+      // 引かないのは min 分まで。それを超えた分は作業時間から引く
+      const free = r.min ? Math.min(e, s + Number(r.min)) : e;
+      if (free > s) out.push({ kind: 'paid', s, e: free, name: b.name });
+      if (e > free) out.push({ kind: 'deduct', s: free, e, name: b.name });
+    } else {
+      out.push({ kind: 'deduct', s, e, name: b.name });
+    }
+  });
+  return out;
+}
+function legDefault() { return (CFG.trip && CFG.trip.legMin) || 20; }
+function tripLegs(d) {
+  if (!d.trip || !d.trip.on) return [];
+  return d.trip.legs.map(l => { const m = toMin(l.start); return m == null ? null : { k: l.id, s: m, e: Math.min(1440, m + (Number(l.min) || legDefault())) }; }).filter(Boolean);
+}
+function sortLegs() { D.trip.legs.sort((a, b) => (toMin(a.start) ?? 9999) - (toMin(b.start) ?? 9999)); }
+function legLabel(i, n) { if (n === 1) return t('legMove'); return i === 0 ? t('tripOut') : i === n - 1 ? t('tripBack') : t('legMove'); }
+function isTrainee(d) { const w = workerById(d.workerId); return !!(w && w.type === 'trainee'); }
+// 一般作業員（運転する人）は、移動を「移動・準備」の作業として自動計上
+function tripMode() { const m = CFG.trip && CFG.trip.mode; return ['work', 'add', 'replace', 'partial'].includes(m) ? m : 'work'; }
+// 移動時間を「休憩になる分」と「作業時間になる分」に分ける
+function tripSplit(d) {
+  const legs = tripLegs(d), out = { breaks: [], works: [], breakMin: 0 };
+  const mode = tripMode();
+  if (mode === 'work') { legs.forEach(l => out.works.push([l.s, l.e])); return out; }   // 移動は労働時間
+  if (mode !== 'partial') { legs.forEach(l => { out.breaks.push([l.s, l.e]); out.breakMin += l.e - l.s; }); return out; }
+  const P = CFG.trip.partial || {}; let budget = Number(P.travelMin) || 20;
+  const order = P.fromLeg === 'first' ? legs.slice() : legs.slice().reverse();
+  order.forEach(l => { const take = Math.min(budget, l.e - l.s); budget -= take;
+    if (take > 0) { out.breaks.push([l.s, l.s + take]); out.breakMin += take; }
+    if (l.s + take < l.e) out.works.push([l.s + take, l.e]); });
+  return out;
+}
+// 車移動で短くなった休憩を知らせる
+function breakNotice(d) {
+  if (!(d.trip && d.trip.on) || tripMode() !== 'partial' || !tripLegs(d).length) return null;
+  const P = CFG.trip.partial || {}; const sch = CFG.schedules[d.schedule] || CFG.schedules.normal;
+  const b = (sch.breaks || []).find(x => x.name === P.breakName); if (!b) return null;
+  const s = toMin(b.s), orig = toMin(b.e) - s;
+  const m = breakMarks(sch, 'trainee', d).find(x => x.name === P.breakName);
+  const len = m ? m.e - m.s : 0;
+  return { name: b.name, orig, len, s, e: s + len, inCar: orig - len };
+}
+function allTasks(d) {
+  if (d.attendance.status === 'absent') return d.tasks;
+  if (isTrainee(d)) { const f = fillerTask();   // 休憩にならない移動は「移動・準備（同乗）」として作業時間に
+    return d.tasks.concat(tripSplit(d).works.map(([s, e], i) => ({ id: 'tripw-' + i, typeId: f ? f.id : 'T90', fieldIds: [], start: toHM(s).padStart(5, '0'), end: toHM(e).padStart(5, '0'), note: '車移動（同乗）', virtual: true }))); }
+  const f = fillerTask();
+  return d.tasks.concat(tripLegs(d).map(l => ({ id: 'trip-' + l.k, typeId: f ? f.id : 'T90', fieldIds: [], start: toHM(l.s).padStart(5, '0'), end: toHM(l.e).padStart(5, '0'),
+    note: l.k === 'out' ? '車移動（行き・運転）' : '車移動（帰り・運転）', virtual: true })));
+}
+// 残業＝終業時刻を過ぎた分。unit 分単位で切り上げ（働いた時間より少なくならない数え方）
+function overtimeOf(d) {
+  const sch = CFG.schedules[d.schedule] || CFG.schedules.normal;
+  const o = CFG.overtime || {}; const unit = Number(o.unit) > 0 ? Number(o.unit) : 30;
+  const endM = toMin(sch.end), outM = toMin(d.attendance.out);
+  if (d.attendance.status === 'absent' || endM == null || outM == null || outM <= endM) return { raw: 0, rounded: 0, unit, from: endM == null ? '' : toHM(endM) };
+  const raw = outM - endM;
+  const rounded = o.round === 'floor' ? Math.floor(raw / unit) * unit : Math.ceil(raw / unit) * unit;
+  return { raw, rounded, unit, from: toHM(endM) };
+}
+function computeDay(d) {
+  const res = { attendMin: 0, workMin: 0, unclassMin: 0, overlapMin: 0, outsideMin: 0, breakWorkMin: 0, paidBreakMin: 0, deductMin: 0,
+    perTask: [], gaps: [], span: null, errors: [], A: null, cover: null, tripBreakMin: 0, tripOutsideMin: 0 };
+  const sch = CFG.schedules[d.schedule] || CFG.schedules.normal;
+  const w = workerById(d.workerId); const type = w && w.type === 'trainee' ? 'trainee' : 'general';
+  const A = new Uint8Array(1440), cover = new Uint8Array(1440);
+  if (d.attendance.status !== 'absent') {
+    const rin = toMin(d.attendance.in), rout = toMin(d.attendance.out), st = toMin(sch.start);
+    if (rin == null || rout == null) res.errors.push('att');
+    else {
+      const inM = Math.max(rin, st == null ? 0 : st), outM = rout;   // 始業前は算入しない
+      if (outM <= inM) res.errors.push('att');
+      else {
+        for (let m = inM; m < outM; m++) A[m] = 1;
+        for (const b of breakMarks(sch, type, d)) for (let m = Math.max(b.s, inM); m < Math.min(b.e, outM); m++) A[m] = b.kind === 'deduct' ? 2 : 3;
+        if (type === 'trainee') for (const [ls, le] of tripSplit(d).breaks) for (let m = ls; m < le; m++) { if (m >= inM && m < outM) { if (A[m] !== 2) A[m] = 4; } else res.tripOutsideMin++; }   // 昼休憩と重なる分は二重に引かない   // 4=車移動の休憩
+        res.span = [inM, outM];
+      }
+    }
+  }
+  let sumRaw = 0;
+  const TS = allTasks(d);
+  TS.forEach(x => {
+    const s = toMin(x.start), e = toMin(x.end); const p = { raw: 0, alloc: 0, valid: false };
+    if (s != null && e != null && e > s) { p.raw = e - s; p.valid = true; sumRaw += p.raw; for (let m = s; m < e; m++) if (cover[m] < 255) cover[m]++; }
+    res.perTask.push(p);
+  });
+  let union = 0;
+  for (let m = 0; m < 1440; m++) {
+    const a = A[m], c = cover[m];
+    if (a === 1 || a === 3) res.attendMin++;
+    if (a === 2 || a === 4) res.deductMin++;
+    if (a === 4) res.tripBreakMin++;
+    if (a === 3) res.paidBreakMin++;
+    if (c > 0) { union++; if (a === 1 || a === 3) res.workMin++; else if (a === 2 || a === 4) res.breakWorkMin++; else res.outsideMin++; }
+    else if (a === 1) res.unclassMin++;       // 有給休憩(3)は未分類に数えない
+  }
+  res.overlapMin = sumRaw - union;
+  // 人件費用の配分：重なった分は作業数で割る → 合計が作業実績時間と一致
+  TS.forEach((x, i) => { const p = res.perTask[i]; if (!p.valid) return; const s = toMin(x.start), e = toMin(x.end); let a = 0;
+    for (let m = s; m < e; m++) if (A[m] === 1 || A[m] === 3) a += 1 / cover[m]; p.alloc = Math.round(a); });
+  let g = null;
+  for (let m = 0; m <= 1440; m++) { const isGap = m < 1440 && A[m] === 1 && cover[m] === 0;
+    if (isGap && g == null) g = m; if (!isGap && g != null) { res.gaps.push([g, m]); g = null; } }
+  res.A = A; res.cover = cover;
+  return res;
+}
+
+/* ---------- 描画 ---------- */
+function render() {
+  if (!ME || !workerById(ME) || workerById(ME).type !== 'trainee') { renderTopBare(); $('#main').innerHTML = ''; $('#foot').innerHTML = ''; openSheet({ kind: 'who', locked: true }); return; }
+  renderTop(); renderMain(); renderFoot();
+}
+function renderTopBare() { $('#top').innerHTML = `<div class="top-row"><div class="who">${esc(t('title'))}</div></div>`; }
+function renderTop() {
+  const w = workerById(ME); const isToday = D.date === todayStr();
+  $('#top').innerHTML = `
+  <div class="top-row">
+    <button class="who" data-act="settings">${esc(w.name)}<small>${t(w.type === 'trainee' ? 'trainee' : 'general')}</small></button>
+    <button class="gear" data-act="settings" aria-label="${t('settings')}">⚙︎</button>
+  </div>
+  <div class="datebar">
+    <button class="nav" data-act="prevDay" aria-label="前の日">◀</button>
+    <div class="datebox">${dateLabel(D.date)} <span class="badge ${isToday ? '' : 'warn'}">${isToday ? t('today') : t('notToday')}</span>
+      <input type="date" id="dateInput" value="${D.date}" max="${todayStr()}" aria-label="日付"></div>
+    <button class="nav" data-act="nextDay" aria-label="次の日" ${D.date >= todayStr() ? 'disabled style="opacity:.3"' : ''}>▶</button>
+  </div>`;
+}
+function renderMain() {
+  const sch = CFG.schedules[D.schedule] || CFG.schedules.normal;
+  const st = D.attendance.status, absent = st === 'absent';
+  const others = unsentDrafts();
+  let h = '';
+  others.forEach(o => { h += `<div class="banner"><span>${t('unsentDay', { d: dateLabel(o.date) })}</span><button class="btn small alert" data-act="gotoDate" data-date="${o.date}">${t('open')}</button></div>`; });
+
+  // 勤務
+  h += `<section class="blk"><h2>${t('day')}</h2><div class="chips">` +
+    ['normal','late','early','absent'].map(s => `<button class="chip ${s !== 'normal' ? 'alert' : ''} ${st === s ? 'on' : ''}" data-act="status" data-v="${s}">${t('status_' + s)}</button>`).join('') + `</div>`;
+  if (!absent) {
+    h += `<div class="gap10"></div><button class="attline" data-act="toggleAtt"><span>${t('work_hours')} ${esc(D.attendance.in)}〜${esc(D.attendance.out)}</span><em>${schedLabel(sch)}　${UI.attOpen ? '▲' : t('edit') + ' ▼'}</em></button>`;
+    if (UI.attOpen) {
+      h += `<div class="gap10"></div><div class="chips">` + Object.keys(CFG.schedules).map(k => `<button class="chip ${D.schedule === k ? 'on' : ''}" data-act="schedule" data-v="${k}">${esc(schedLabel(CFG.schedules[k]))}</button>`).join('') + `</div>
+      <div class="gap10"></div><div class="row2"><label class="f">${t('in')}<input type="time" step="300" data-att="in" value="${esc(D.attendance.in)}"></label>
+      <label class="f">${t('out')}<input type="time" step="300" data-att="out" value="${esc(D.attendance.out)}"></label></div>`;
+    }
+  }
+  if (!absent) {
+    const tr = D.trip, n = tr.legs.length;
+    h += `<div class="tripq ${tr.answered ? '' : 'need'}"><b>🚗 ${t('tripQ')}</b><div class="yn">
+      <button class="chip ${tr.answered && !tr.on ? 'on' : ''}" data-act="tripNo">${t('no')}</button>
+      <button class="chip ${tr.on ? 'on' : ''}" data-act="tripYes">${t('yes')}</button></div>`;
+    if (tr.on) {
+      const bn = breakNotice(D);
+      if (bn) h += `<div class="bnotice" role="status">⏰ ${bn.len > 0 ? t('breakNotice', { b: bn.name, n: bn.len, s: toHM(bn.s), e: toHM(bn.e) }) : t('breakNone', { b: bn.name })}
+        <small>${t('breakSub', { o: bn.orig, c: bn.inCar })}</small></div>`;
+      h += tr.legs.map((l, i) => `<div class="leg"><div class="leg-h"><b>${legLabel(i, n)}</b>${n > 1 ? `<button class="del" data-act="legDel" data-i="${i}">${t('del')}</button>` : ''}</div>
+        <div class="leg-row"><label class="f">${t('depart')}<input type="time" step="300" data-leg="${i}" value="${esc(l.start)}"></label>
+        <div class="chips mins">${[10, 20, 30, 40].map(m => `<button class="chip ${Number(l.min) === m ? 'on' : ''}" data-act="legMin" data-i="${i}" data-v="${m}">${m}${LANG === 'id' ? 'm' : '分'}</button>`).join('')}</div></div></div>`).join('');
+      h += `<button class="btn small full" data-act="legAdd">${t('legAdd')}</button>
+        <div class="kv">${t('driver')}</div><div class="chips">${CFG.workers.filter(w => w.type !== 'trainee').map(w => `<button class="chip ${tr.driverId === w.id ? 'on' : ''}" data-act="driver" data-v="${w.id}">${esc(w.name)}</button>`).join('')}</div>
+        <p class="tripnote">${tripMode() === 'partial' ? t('tripPartial', { n: (CFG.trip.partial || {}).travelMin || 20, b: (CFG.trip.partial || {}).breakName || '' }) : t('tripTrainee')}</p>`;
+    }
+    h += `</div>`;
+  }
+  if (!absent) {
+    const bp = breakPicker(); const w0 = workerById(D.workerId); const ty = w0 && w0.type === 'trainee' ? 'trainee' : 'general';
+    const cur = k => D.breaks[k] == null ? defaultBreakMin(ty) : D.breaks[k];
+    const row = (k, name) => { const b = (sch.breaks || []).find(x => x.name === name);
+      return `<div class="brow"><p class="blabel">${esc(name)}${b ? `<span>${esc(b.s)} ごろ</span>` : ''}</p><div class="chips bmin">` +
+        bp.options.map(m => `<button class="chip ${cur(k) === m ? 'on' : ''}" data-act="brk" data-k="${k}" data-v="${m}">${m > 0 ? m + (LANG === 'id' ? 'm' : '分') : t('noBreak')}</button>`).join('') + `</div></div>`; };
+    h += `<div class="breaks"><p class="btitle">${t('breaks')}</p>${row('am', bp.am)}${row('pm', bp.pm)}</div>`;
+  }
+  if (st !== 'normal') h += `<textarea data-g="statusNote" placeholder="${absent ? t('absentNote') : t('reason')}">${esc(D.statusNote)}</textarea>`;
+  if (!absent) h += `<div id="summary"></div>`;
+  h += `</section>`;
+
+  // 作業
+  if (!absent) {
+    h += `<section class="blk"><h2>${t('tasks')}</h2><div id="cards">${D.tasks.map((x, i) => cardHTML(x, i)).join('')}</div>
+      <button class="addtask" data-act="addTask">${t('addTask')}</button></section>`;
+    // 共同作業者（照合用・折りたたみ）
+    const names = D.coworkers.map(id => (workerById(id) || { name: id }).name);
+    h += `<section class="blk"><button class="fold" data-act="toggleCo">${t('coworkers')}<span>${names.length ? esc(names.join('・')) : t('none')} ${UI.coOpen ? '▲' : '▼'}</span></button>`;
+    if (UI.coOpen) {
+      const last = store.get('lastCoworkers:' + ME, []);
+      const grp = (label, list) => list.length ? `<p class="gtitle">${label}</p><div class="chips">` +
+        list.map(w => `<button class="chip ${D.coworkers.includes(w.id) ? 'on' : ''}" data-act="coworker" data-v="${w.id}">${esc(w.name)}</button>`).join('') + `</div>` : '';
+      const rest = CFG.workers.filter(w => w.id !== ME);
+      h += grp(t('general'), rest.filter(w => w.type !== 'trainee')) + grp(t('trainee'), rest.filter(w => w.type === 'trainee'));
+      if (last.length && !D.coworkers.length) h += `<div class="gap10"></div><button class="btn small" data-act="coLast">${t('sameAsLast')}</button>`;
+    }
+    h += `</section>`;
+  }
+  // 報告
+  h += `<section class="blk"><h2>${t('report')}</h2><div class="chips">
+    ${INC_TYPES.map(k => `<button class="chip alert ${D.incOn[k] ? 'on' : ''}" data-act="inc" data-v="${k}">${t(k)}</button>`).join('')}</div>`;
+  INC_TYPES.forEach(k => { if (D.incOn[k]) h += `<textarea data-inc="${k}" placeholder="${t(k)}：${I18N[LANG]['ph_' + k] || t('whatHappened')}">${esc(D.incidents[k])}</textarea>`; });
+  h += `</section>`;
+  $('#main').innerHTML = h;
+  if (!absent) renderSummary();
+}
+function cardHTML(x, i) {
+  const tk = taskById(x.typeId); const noField = tk && tk.noField;
+  const usage = store.get('usage', {}); const tu = (usage.tasks) || {};
+  const sorted = CFG.tasks.map((k, idx) => ({ k, idx })).sort((a, b) => ((tu[b.k.id] || 0) - (tu[a.k.id] || 0)) || a.idx - b.idx).map(o => o.k);
+  let shown = UI.more[x.id] ? sorted : sorted.slice(0, 5);
+  if (tk && !shown.includes(tk)) shown = shown.concat([tk]);
+  const places = x.fieldIds.map(id => { const f = fieldById(id); return f ? f.name : id + t('unknownPlace'); });
+  const pIcon = x.fieldIds.length ? catIcon(catOf(fieldById(x.fieldIds[0]))) : '📍';
+  return `<div class="card" data-card="${i}">
+    <div class="card-h"><span class="n">${t('task')} ${i + 1}</span><span class="d" id="cd${i}"></span><button class="del" data-act="delTask" data-i="${i}">${t('del')}</button></div>
+    ${noField ? '' : `<button class="pick ${places.length ? '' : 'empty'}" data-act="pickField" data-i="${i}">${pIcon} ${places.length ? esc(places.join('・')) : t('pickPlace')}</button>`}
+    <div class="chips">${shown.map(k => `<button class="chip ${x.typeId === k.id ? 'on' : ''}" data-act="taskType" data-i="${i}" data-v="${k.id}">${esc(taskName(k))}</button>`).join('')}
+      <button class="chip ghost" data-act="moreTasks" data-i="${i}">${UI.more[x.id] ? t('less') : t('more') + ' ▾'}</button></div>
+    <div class="times"><label class="f">${t('start')}<input type="time" step="300" data-i="${i}" data-f="start" value="${esc(x.start)}"></label><span class="sep">〜</span>
+      <label class="f">${t('end')}<input type="time" step="300" data-i="${i}" data-f="end" value="${esc(x.end)}"></label></div>
+    <details class="memo" ${x.note ? 'open' : ''}><summary>${t('memo')}</summary><textarea data-i="${i}" data-f="note">${esc(x.note)}</textarea></details>
+  </div>`;
+}
+function renderSummary() {
+  const box = $('#summary'); if (!box) return;
+  const c = computeDay(D);
+  const sch = CFG.schedules[D.schedule] || CFG.schedules.normal;
+  // 各カードの時間表示
+  c.perTask.forEach((p, i) => { const el = document.getElementById('cd' + i); if (!el) return;
+    el.textContent = p.valid ? dur(p.raw) + (p.alloc !== p.raw ? `（${t('recorded')} ${dur(p.alloc)}）` : '') : ''; });
+  if (!c.span) { box.innerHTML = ''; return; }
+  // 帯の表示範囲
+  let lo = Math.min(c.span[0], toMin(sch.start) ?? c.span[0]), hi = Math.max(c.span[1], toMin(sch.end) ?? c.span[1]);
+  D.tasks.forEach(x => { const s = toMin(x.start), e = toMin(x.end); if (s != null && e != null && e > s) { lo = Math.min(lo, s); hi = Math.max(hi, e); } });
+  lo = Math.floor(lo / 60) * 60; hi = Math.ceil(hi / 60) * 60; const span = Math.max(60, hi - lo);
+  const cat = m => { const a = c.A[m], k = c.cover[m];
+    if (a === 4) return 'trip';
+    if (a === 2) return 'deduct';            // 引く休憩
+    if (a === 3) return 'paid';              // 引かない休憩（作業と重なっていても帯には出す）
+    if (k > 0) return a === 1 ? 'work' : 'outside';   // 休憩をまたぐカードは普通なので休憩色のまま
+    return a === 1 ? 'gap' : a === 2 ? 'deduct' : a === 3 ? 'paid' : null; };
+  let segs = '', cur = null, from = lo;
+  for (let m = lo; m <= hi; m++) { const k = m < hi ? cat(m) : '__end';
+    if (k !== cur) { if (cur) segs += `<div class="seg ${cur}" style="left:${(from - lo) / span * 100}%;width:${(m - from) / span * 100}%"></div>`; cur = k; from = m; } }
+  const step = span > 600 ? 120 : 60; let ticks = '';
+  for (let m = lo; m <= hi; m += step) ticks += `<span style="left:${(m - lo) / span * 100}%">${Math.floor(m / 60)}</span>`;
+  const warnU = c.unclassMin >= (CFG.unclassWarnMin || 15);
+  const warns = [];
+  if (warnU) warns.push(t('warnUnclass', { d: dur(c.unclassMin) }));
+  if (c.overlapMin > 0) warns.push(t('warnOverlap', { d: dur(c.overlapMin) }));
+  if (c.tripOutsideMin > 0) warns.push(t('warnTripOut', { d: dur(c.tripOutsideMin) }));
+  if (c.outsideMin > 0) warns.push(t('warnOutside', { d: dur(c.outsideMin) }));
+  box.innerHTML = `<div class="gap10"></div><div class="tlwrap"><div class="tl" role="img" aria-label="${t('attend')} ${dur(c.attendMin)}, ${t('work')} ${dur(c.workMin)}, ${t('unclass')} ${dur(c.unclassMin)}">${segs}</div>
+    <div class="ticks">${ticks}</div>
+    <div class="legend"><span><i style="background:var(--ta)"></i>${t('legendWork')}</span><span><i style="background:#B8BEB0"></i>${t('legendBreak')}</span>${c.paidBreakMin > 0 ? `<span><i style="background:#A8C49A"></i>${t('legendPaid')}</span>` : ''}
+      <span><i style="background:var(--alert)"></i>${t('legendGap')}</span>${c.tripBreakMin > 0 ? `<span><i style="background:#CFD4C8;border:1px solid #B8BEB0"></i>🚗 ${t('legendTrip')}</span>` : ''}${c.outsideMin > 0 ? `<span><i style="background:#7C8C98"></i>${t('legendOut')}</span>` : ''}</div></div>
+    <div class="stats"><div class="stat"><small>${t('attend')}</small><b>${toHM(c.attendMin)}</b></div>
+      <div class="stat"><small>${t('work')}</small><b>${toHM(c.workMin)}</b></div>
+      <div class="stat ${warnU ? 'bad' : ''}"><small>${t('unclass')}</small><b>${toHM(c.unclassMin)}</b></div></div>
+    ${(o => o.rounded > 0 ? `<p class="ot">🕔 ${t('overtime')} <b>${dur(o.rounded)}</b>　<span>${t('otNote', { f: o.from, o: esc(D.attendance.out), r: o.raw, u: o.unit })}</span></p>` : '')(overtimeOf(D))}
+    ${warns.length ? `<ul class="warns">${warns.map(w => `<li>⚠ ${esc(w)}</li>`).join('')}</ul>` : ''}
+    ${fillerTask() && c.gaps.some(g => g[1] - g[0] >= 5 && g[1] - g[0] <= (CFG.fillMaxMin || 30)) ? `<div class="gap10"></div><button class="btn small full" data-act="fillGap">${t('fillGap')}</button>` : ''}`;
+}
+function renderFoot() {
+  const ob = store.get('outbox', []); const list = Array.isArray(ob) ? ob : [];
+  const mine = list.find(x => x && x.reportId === D.reportId);
+  const others = list.filter(x => x && x.reportId !== D.reportId).length;
+  let cls = '', msg = '', btn = '';
+  if (mine) { cls = 'wait'; msg = `${t('pendingState')}（${t('rev', { n: mine.revision })}）${!CFG.gasUrl ? t('noUrl') : t('autoRetry')}`; btn = `<button class="btn small" data-act="retry">${t('retryNow')}</button>`; }
+  else if (D.revision > 0 && D.dirty) { cls = 'wait'; msg = t('changed'); }
+  else if (D.confirmedRevision > 0) { cls = 'ok'; msg = `✓ ${t('sentState')}（${t('rev', { n: D.confirmedRevision })}）`; }
+  if (others) msg += (msg ? '　' : '') + t('otherPending', { n: others });
+  $('#foot').innerHTML = `<div class="sendstat ${cls}"><span>${esc(msg)}</span>${btn}</div>
+    <button class="send" data-act="send" ${flushing ? 'disabled' : ''}>${D.revision > 0 ? t('resend') : t('send')}</button>
+    <button class="linebtn" data-act="line">${t('line')}</button>`;
+}
+
+/* ---------- シート ---------- */
+function openSheet(s) { UI.sheet = s; renderSheet(); }
+function closeSheet() { if (UI.sheet && UI.sheet.locked) return; UI.sheet = null; $('#sheetRoot').innerHTML = ''; }
+function renderSheet() {
+  const s = UI.sheet; if (!s) { $('#sheetRoot').innerHTML = ''; return; }
+  let h = '';
+  if (s.kind === 'who') {
+    h = `<h3>${t('whoAreYou')}</h3>` + CFG.workers.filter(w => w.type === 'trainee').map(w => `<button class="whobtn" data-act="setWho" data-v="${w.id}">${esc(w.name)}<small>${t(w.type === 'trainee' ? 'trainee' : 'general')}</small></button>`).join('') +
+      `<div class="gap10"></div><div class="chips"><button class="chip ${LANG === 'ja' ? 'on' : ''}" data-act="lang" data-v="ja">日本語</button><button class="chip ${LANG === 'id' ? 'on' : ''}" data-act="lang" data-v="id">Bahasa Indonesia</button></div>`;
+  } else if (s.kind === 'field') {
+    const usage = store.get('usage', {}); const fu = usage.fields || {};
+    const freq = CFG.fields.filter(f => fu[f.id]).sort((a, b) => fu[b.id] - fu[a.id]).slice(0, 6);
+    const chip = f => `<button class="chip ${s.sel.includes(f.id) ? 'on' : ''}" data-act="fieldToggle" data-v="${f.id}">${esc(f.name)}</button>`;
+    h = `<h3>${t('pickPlace')}</h3>`;
+    if (freq.length) h += `<div class="zone"><b>${t('frequent')}</b></div><div class="chips">${freq.map(chip).join('')}</div>`;
+    const cats = fieldCats();
+    if (!s.cat || !cats.some(c => c.id === s.cat)) { const f0 = fieldById(s.sel[0]); s.cat = f0 ? catOf(f0) : (cats[0] || {}).id; }
+    if (cats.length > 1) h += `<div class="cattabs">${cats.map(c => { const n = CFG.fields.filter(f => catOf(f) === c.id && s.sel.includes(f.id)).length;
+      return `<button class="cattab ${s.cat === c.id ? 'on' : ''}" data-act="fieldCat" data-v="${esc(c.id)}">${c.icon || ''} ${esc(catLabel(c))}${n ? `<i>${n}</i>` : ''}</button>`; }).join('')}</div>`;
+    const inCat = CFG.fields.filter(f => catOf(f) === s.cat);
+    const zones = [...new Set(inCat.map(f => f.zone || '—'))];
+    zones.forEach(z => { const fs = inCat.filter(f => (f.zone || '—') === z); const all = fs.every(f => s.sel.includes(f.id));
+      h += `<div class="zone"><b>${esc(z)}</b>${fs.length > 1 ? `<button class="chip ${all ? 'on' : ''}" data-act="zoneAll" data-v="${esc(s.cat + '|' + z)}">${esc(z)} ${t('zoneAll')}</button>` : ''}</div><div class="chips">${fs.map(chip).join('')}</div>`; });
+    s.sel.filter(id => !fieldById(id)).forEach(id => { h += `<div class="kv">${esc(id)} ${t('unknownPlace')}</div>`; });
+    h += `<div class="sheet-foot"><button class="btn solid full" data-act="fieldDone">${t('done')}</button></div>`;
+  } else if (s.kind === 'settings') {
+    const ob = store.get('outbox', []);
+    h = `<h3>${t('settings')}</h3>
+      <button class="btn full" data-act="openWho">${t('changeName')}</button><div class="gap10"></div>
+      <div class="kv">${t('lang')}</div><div class="chips"><button class="chip ${LANG === 'ja' ? 'on' : ''}" data-act="lang" data-v="ja">日本語</button><button class="chip ${LANG === 'id' ? 'on' : ''}" data-act="lang" data-v="id">Bahasa Indonesia</button></div><div class="gap10"></div>
+      <button class="btn full" data-act="reloadCfg">${t('reloadCfg')}</button><div class="gap10"></div>
+      <button class="btn full" data-act="retry">${t('retryNow')}（${Array.isArray(ob) ? ob.length : 0}）</button>
+      <div class="kv">app ${APP_VERSION} ／ ${CFG.source === 'sheet' ? t('cfgSheet') : t('cfgFileSrc')} ${esc(CFG.version)} ／ ${CFG.gasUrl ? 'GAS ✓' : esc(t('noUrl'))}</div>
+      <div class="sheet-foot"><button class="btn full" data-act="closeSheet">${t('close')}</button></div>`;
+  }
+  $('#sheetRoot').innerHTML = `<div class="sheet-bg" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true"><div class="sheet-in">${h}</div></div>`;
+}
+
+/* ---------- 送信 ---------- */
+function periodOf(ds) { const cd = CFG.closingDay || 15; let [y, m, d] = ds.split('-').map(Number); if (d > cd) { m++; if (m > 12) { m = 1; y++; } } return `${y}-${pad(m)}`; }
+function validate() {
+  if (!ME) return [t('errWho')];
+  if (D.attendance.status === 'absent') return [];
+  const c = computeDay(D); const e = [];
+  if (c.errors.includes('att')) e.push(t('errAtt'));
+  if (!D.tasks.length) e.push(t('errNoTask'));
+  if (!D.trip.answered) e.push(t('errTripQ'));
+  else if (D.trip.on && (!D.trip.legs.length || tripLegs(D).length < D.trip.legs.length)) e.push(t('errTrip'));
+  D.tasks.forEach((x, i) => { const tk = taskById(x.typeId);
+    if (!x.typeId) e.push(t('errType', { n: i + 1 }));
+    else if (!(tk && tk.noField) && !x.fieldIds.length) e.push(t('errPlace', { n: i + 1 }));
+    if (!c.perTask[i].valid) e.push(t('errTime', { n: i + 1 })); });
+  return e;
+}
+function buildPayload(c) {
+  const w = workerById(ME); const absent = D.attendance.status === 'absent';
+  const sch = CFG.schedules[D.schedule] || CFG.schedules.normal;
+  return {
+    schemaVersion: 2, app: 'nippo', appVersion: APP_VERSION, configVersion: CFG.version,
+    reportId: D.reportId, revision: D.revision, clientSentAt: new Date().toISOString(),
+    workDate: D.date, period: periodOf(D.date),
+    worker: { id: w.id, name: w.name, type: w.type === 'trainee' ? 'trainee' : 'general' },
+    schedule: { key: D.schedule, label: sch.label, start: sch.start, end: sch.end },
+    attendance: { status: D.attendance.status, in: absent ? '' : D.attendance.in, out: absent ? '' : D.attendance.out,
+      effectiveIn: c.span ? toHM(c.span[0]) : '', note: D.statusNote },
+    overtime: (o => ({ fromTime: o.from, actualMin: o.raw, payMin: o.rounded, unit: o.unit, round: (CFG.overtime || {}).round === 'floor' ? 'floor' : 'ceil' }))(overtimeOf(D)),
+    breaks: { am: D.breaks.am == null ? defaultBreakMin((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general') : D.breaks.am,
+      pm: D.breaks.pm == null ? defaultBreakMin((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general') : D.breaks.pm },
+    coworkers: D.coworkers.map(id => ({ id, name: (workerById(id) || { name: id }).name })),
+    trip: D.trip.on && !absent ? { on: true, rule: tripMode() === 'partial' ? 'trainee-partial' : tripMode() === 'work' ? 'trainee-work' : 'trainee-break', breakMin: tripSplit(D).breakMin, legs: D.trip.legs.map(l => { const s = toMin(l.start); return { start: l.start, min: Number(l.min), end: s == null ? '' : toHM(s + Number(l.min)).padStart(5, '0') }; }),
+      driver: D.trip.driverId ? { id: D.trip.driverId, name: (workerById(D.trip.driverId) || { name: D.trip.driverId }).name } : null } : { on: false, answered: !!D.trip.answered },
+    tasks: absent ? [] : allTasks(D).map((x, i) => { const tk = taskById(x.typeId) || { id: x.typeId, name: x.typeId };
+      return { seq: i + 1, taskTypeId: tk.id, taskName: tk.name,
+        fieldIds: tk.noField ? [] : x.fieldIds.slice(),
+        fieldNames: tk.noField ? [] : x.fieldIds.map(id => (fieldById(id) || { name: id }).name),
+        fieldAreas: tk.noField ? [] : x.fieldIds.map(id => Number((fieldById(id) || {}).area) || 0),
+        fieldCats: tk.noField ? [] : x.fieldIds.map(id => catOf(fieldById(id))),
+        start: x.start, end: x.end, rawMin: c.perTask[i].raw, allocMin: c.perTask[i].alloc, note: x.note, auto: !!x.virtual }; }),
+    incidents: INC_TYPES.filter(k => D.incOn[k]).map(k => ({ type: k, label: I18N.ja[k], text: D.incidents[k] })),
+    calc: absent ? { attendMin: 0, workMin: 0, unclassMin: 0, overlapMin: 0, outsideMin: 0, breakWorkMin: 0, paidBreakMin: 0, tripBreakMin: 0 } :
+      { attendMin: c.attendMin, workMin: c.workMin, unclassMin: c.unclassMin, overlapMin: c.overlapMin, outsideMin: c.outsideMin, breakWorkMin: c.breakWorkMin, paidBreakMin: c.paidBreakMin, tripBreakMin: c.tripBreakMin, tripOutsideMin: c.tripOutsideMin }
+  };
+}
+function bumpUsage() {
+  const u = store.get('usage', {}); u.fields = u.fields || {}; u.tasks = u.tasks || {};
+  D.tasks.forEach(x => { if (x.typeId) u.tasks[x.typeId] = (u.tasks[x.typeId] || 0) + 1; x.fieldIds.forEach(f => u.fields[f] = (u.fields[f] || 0) + 1); });
+  store.set('usage', u);
+}
+function onSend() {
+  if (flushing) return;
+  const errs = validate(); if (errs.length) { toast(errs[0]); return; }
+  const c = computeDay(D);
+  if (D.attendance.status !== 'absent' && c.unclassMin >= (CFG.unclassWarnMin || 15) && !confirm(t('confirmUnclass', { d: dur(c.unclassMin) }))) return;
+  const h = hash(contentOf(D));
+  if (h === D.sentHash) { toast(t('noChange')); flushOutbox(); return; }
+  D.revision++;
+  const p = buildPayload(c);
+  enqueue(p);
+  D.sentHash = h; D.dirty = false; persist();
+  bumpUsage(); if (D.coworkers.length) store.set('lastCoworkers:' + ME, D.coworkers);
+  toast(t('queued')); render(); flushOutbox(true);
+}
+function enqueue(p) {
+  let ob = store.get('outbox', []); if (!Array.isArray(ob)) ob = [];
+  ob = ob.filter(x => x && x.payload && !(x.reportId === p.reportId && x.revision <= p.revision));   // 同じ日報の古い版は捨てる
+  ob.push({ reportId: p.reportId, revision: p.revision, date: p.workDate, workerId: p.worker.id, payload: p, tries: 0, lastError: '', queuedAt: Date.now() });
+  store.set('outbox', ob);
+}
+let flushing = false;
+async function flushOutbox(manual) {
+  if (flushing) return;
+  let ob = store.get('outbox', []); if (!Array.isArray(ob) || !ob.length) { if (D) renderFoot(); return; }
+  if (!CFG.gasUrl) { if (manual) toast(t('noUrl')); if (D) renderFoot(); return; }
+  if (navigator.onLine === false) { if (manual) toast(t('autoRetry')); if (D) renderFoot(); return; }
+  flushing = true; if (D) renderFoot();
+  let okCount = 0;
+  for (const item of ob.slice()) {
+    if (!item || !item.payload) continue;
+    try {
+      const ctrl = new AbortController(); const tm = setTimeout(() => ctrl.abort(), 25000);
+      const r = await fetch(CFG.gasUrl, { method: 'POST', body: JSON.stringify(item.payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ctrl.signal, redirect: 'follow' });
+      clearTimeout(tm);
+      const j = await r.json();
+      if (!j || !j.ok) throw new Error((j && j.error) || 'NG');
+      // 成功：outbox から除き、下書きに確定版を記録
+      const cur = store.get('outbox', []).filter(x => x && !(x.reportId === item.reportId && x.revision <= item.revision));
+      store.set('outbox', cur);
+      const k = draftKey(item.date, item.workerId); const d = store.get(k, null);
+      if (d && d.reportId === item.reportId) { d.confirmedRevision = Math.max(Number(d.confirmedRevision) || 0, item.revision); store.set(k, d); if (D && D.reportId === d.reportId) D.confirmedRevision = d.confirmedRevision; }
+      okCount++;
+    } catch (e) {
+      const cur = store.get('outbox', []); const it = cur.find(x => x && x.reportId === item.reportId && x.revision === item.revision);
+      if (it) { it.tries = (it.tries || 0) + 1; it.lastError = String(e && e.message || e).slice(0, 120); store.set('outbox', cur); }
+      break;   // 電波が悪い時は残りも失敗するので、次の機会にまとめて
+    }
+  }
+  flushing = false;
+  if (okCount && manual) toast(t('sentOk'));
+  if (D) renderFoot();
+}
+function lineText() { const keep = LANG; LANG = 'ja'; try { return lineTextJa(); } finally { LANG = keep; } }   // 事務所向けは日本語
+function lineTextJa() {
+  const w = workerById(ME); const c = computeDay(D); const L = [];
+  L.push(`【作業日報】${dateLabel(D.date)} ${w.name}`);
+  if (D.attendance.status === 'absent') L.push(`欠勤 ${D.statusNote}`);
+  else {
+    if (D.attendance.status !== 'normal') L.push(`${I18N.ja['status_' + D.attendance.status]}：${D.statusNote}`);
+    { const o = overtimeOf(D); if (o.rounded > 0) L.push(`🕔 残業 ${toHM(o.rounded)}（${o.from}〜${D.attendance.out}／実際 ${o.raw}分・${o.unit}分単位で切り上げ）`); }
+    L.push(`休憩 午前${D.breaks.am == null ? defaultBreakMin((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general') : D.breaks.am}分／午後${D.breaks.pm == null ? defaultBreakMin((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general') : D.breaks.pm}分`);
+    L.push(`勤務 ${D.attendance.in}〜${D.attendance.out}（勤怠 ${toHM(c.attendMin)}／作業 ${toHM(c.workMin)}／未分類 ${toHM(c.unclassMin)}）`);
+    D.tasks.forEach((x, i) => { const tk = taskById(x.typeId); const pl = x.fieldIds.map(id => (fieldById(id) || { name: id }).name).join('・');
+      L.push(`${i + 1}. ${x.start}-${x.end} ${pl} ${tk ? tk.name : ''}${x.note ? '（' + x.note + '）' : ''}`); });
+    { const bn = breakNotice(D); if (bn) L.push(bn.len > 0 ? `⏰ ${bn.name} ${bn.len}分（${toHM(bn.s)}〜${toHM(bn.e)}）※${bn.inCar}分は車内で休憩扱い` : `⏰ 現場での${bn.name}なし（車内で休憩扱い）`); }
+    L.push(D.trip.on ? `🚗 車移動 ${D.trip.legs.map(l => l.start + '(' + l.min + '分)').join('・')}（${c.tripBreakMin > 0 ? 'うち休憩扱い ' + c.tripBreakMin + '分' : '作業時間として記録'}）${D.trip.driverId ? ' 運転：' + (workerById(D.trip.driverId) || {}).name : ''}` : '🚗 車移動なし');
+    if (D.coworkers.length) L.push('一緒に：' + D.coworkers.map(id => (workerById(id) || { name: id }).name).join('・'));
+  }
+  INC_TYPES.forEach(k => { if (D.incOn[k]) L.push(`⚠${I18N.ja[k]}：${D.incidents[k]}`); });
+  L.push(`#${D.reportId.slice(0, 8)} r${D.revision}`);
+  return L.join('\n');
+}
+
+/* ---------- 操作 ---------- */
+function defaultNextStart() {
+  const sch = CFG.schedules[D.schedule] || CFG.schedules.normal;
+  const ends = D.tasks.map(x => toMin(x.end)).filter(v => v != null);
+  const inM = Math.max(toMin(D.attendance.in) ?? toMin(sch.start), toMin(sch.start));
+  return ends.length ? Math.max(...ends) : inM;
+}
+const ACT = {
+  settings: () => openSheet({ kind: 'settings' }),
+  closeSheet: () => closeSheet(),
+  openWho: () => openSheet({ kind: 'who' }),
+  setWho: b => { ME = b.dataset.v; store.set('worker', ME); UI.sheet = null; $('#sheetRoot').innerHTML = ''; loadDraft(D && D.date || todayStr()); render(); },
+  lang: b => { LANG = b.dataset.v; store.set('lang', LANG); renderSheet(); if (D) render(); },
+  reloadCfg: () => loadConfig(true),
+  retry: () => flushOutbox(true),
+  prevDay: () => gotoDate(addDays(D.date, -1)),
+  nextDay: () => { if (D.date < todayStr()) gotoDate(addDays(D.date, 1)); },
+  gotoDate: b => gotoDate(b.dataset.date),
+  status: b => { const v = b.dataset.v; D.attendance.status = v;
+    const sch = CFG.schedules[D.schedule];
+    if (v === 'normal') { D.attendance.in = sch.start; D.attendance.out = sch.end; }
+    UI.attOpen = (v === 'late' || v === 'early'); edited(); render(); },
+  toggleAtt: () => { UI.attOpen = !UI.attOpen; renderMain(); },
+  schedule: b => { const old = CFG.schedules[D.schedule], nw = CFG.schedules[b.dataset.v];
+    if (D.attendance.in === old.start) D.attendance.in = nw.start;
+    if (D.attendance.out === old.end) D.attendance.out = nw.end;
+    D.schedule = b.dataset.v; store.set('lastSchedule', D.schedule); edited(); render(); },
+  addTask: () => { const s = defaultNextStart(); const sch = CFG.schedules[D.schedule] || CFG.schedules.normal;
+    const outM = toMin(D.attendance.out) ?? toMin(sch.end); const e = Math.min(s + 60, Math.max(outM, s + 5), 1439);
+    const prev = D.tasks[D.tasks.length - 1];
+    D.tasks.push({ id: uid(), typeId: null, fieldIds: prev ? prev.fieldIds.slice() : [], start: toHM(s).padStart(5, '0'), end: toHM(e).padStart(5, '0'), note: '' });
+    edited(); renderMain(); renderFoot();
+    const cards = document.querySelectorAll('.card'); if (cards.length) cards[cards.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' }); },
+  delTask: b => { const i = +b.dataset.i; const x = D.tasks[i]; const tk = taskById(x.typeId);
+    if ((x.typeId || x.fieldIds.length) && !confirm(`${t('task')} ${i + 1}${tk ? '（' + tk.name + '）' : ''} を${t('del')}？`)) return;
+    D.tasks.splice(i, 1); edited(); renderMain(); renderFoot(); },
+  taskType: b => { const x = D.tasks[+b.dataset.i]; x.typeId = b.dataset.v; edited(); renderMain(); renderFoot();
+    const tk = taskById(x.typeId); if (!(tk && tk.noField) && !x.fieldIds.length) openSheet({ kind: 'field', i: +b.dataset.i, sel: [] }); },
+  moreTasks: b => { const x = D.tasks[+b.dataset.i]; UI.more[x.id] = !UI.more[x.id]; renderMain(); },
+  pickField: b => { const i = +b.dataset.i; openSheet({ kind: 'field', i, sel: D.tasks[i].fieldIds.slice() }); },
+  fieldToggle: b => { const s = UI.sheet, v = b.dataset.v; const k = s.sel.indexOf(v); if (k >= 0) s.sel.splice(k, 1); else s.sel.push(v); renderSheet(); },
+  fieldCat: b => { UI.sheet.cat = b.dataset.v; renderSheet(); },
+  zoneAll: b => { const s = UI.sheet, [c, z] = b.dataset.v.split('|'); const ids = CFG.fields.filter(f => catOf(f) === c && (f.zone || '—') === z).map(f => f.id);
+    const all = ids.every(id => s.sel.includes(id)); s.sel = all ? s.sel.filter(id => !ids.includes(id)) : [...new Set(s.sel.concat(ids))]; renderSheet(); },
+  fieldDone: () => { const s = UI.sheet; if (D.tasks[s.i]) { D.tasks[s.i].fieldIds = s.sel.slice(); edited(); } UI.sheet = null; $('#sheetRoot').innerHTML = ''; renderMain(); renderFoot(); },
+  toggleCo: () => { UI.coOpen = !UI.coOpen; renderMain(); },
+  coworker: b => { const v = b.dataset.v; const k = D.coworkers.indexOf(v); if (k >= 0) D.coworkers.splice(k, 1); else D.coworkers.push(v); edited(); renderMain(); renderFoot(); },
+  coLast: () => { D.coworkers = store.get('lastCoworkers:' + ME, []).filter(id => workerById(id) && id !== ME); edited(); renderMain(); renderFoot(); },
+  brk: b => { D.breaks[b.dataset.k] = Number(b.dataset.v); edited(); renderMain(); renderFoot(); },
+  inc: b => { const k = b.dataset.v; D.incOn[k] = !D.incOn[k]; edited(); renderMain(); renderFoot(); },
+  fillGap: () => { const f = fillerTask(); if (!f) return; const c = computeDay(D);
+    c.gaps.filter(g => g[1] - g[0] >= 5 && g[1] - g[0] <= (CFG.fillMaxMin || 30)).forEach(g => D.tasks.push({ id: uid(), typeId: f.id, fieldIds: [], start: toHM(g[0]).padStart(5, '0'), end: toHM(g[1]).padStart(5, '0'), note: '' }));
+    D.tasks.sort((a, b) => (toMin(a.start) ?? 9999) - (toMin(b.start) ?? 9999)); edited(); renderMain(); renderFoot(); },
+  tripNo: () => { D.trip.answered = true; D.trip.on = false; edited(); renderMain(); renderFoot(); },
+  tripYes: () => { const sch = CFG.schedules[D.schedule] || CFG.schedules.normal; D.trip.answered = true; D.trip.on = true;
+    if (!D.trip.legs.length) { const L = legDefault();
+      const inM = Math.max(toMin(D.attendance.in) ?? toMin(sch.start), toMin(sch.start)), outM = toMin(D.attendance.out) ?? toMin(sch.end);
+      D.trip.legs = [{ id: uid(), start: toHM(inM).padStart(5, '0'), min: L }, { id: uid(), start: toHM(Math.max(inM, outM - L)).padStart(5, '0'), min: L }]; }
+    if (!D.trip.driverId) { const last = store.get('lastDriver:' + ME, ''); if (workerById(last)) D.trip.driverId = last; }
+    edited(); renderMain(); renderFoot(); },
+  legMin: b => { D.trip.legs[+b.dataset.i].min = +b.dataset.v; edited(); renderMain(); renderFoot(); },
+  legDel: b => { D.trip.legs.splice(+b.dataset.i, 1); edited(); renderMain(); renderFoot(); },
+  legAdd: () => { D.trip.legs.push({ id: uid(), start: '', min: legDefault() }); edited(); renderMain(); renderFoot(); },
+  driver: b => { D.trip.driverId = D.trip.driverId === b.dataset.v ? '' : b.dataset.v; if (D.trip.driverId) store.set('lastDriver:' + ME, D.trip.driverId); edited(); renderMain(); renderFoot(); },
+  send: () => onSend(),
+  line: () => { const url = 'https://line.me/R/msg/text/?' + encodeURIComponent(lineText()); window.location.href = url; }
+};
+function gotoDate(ds) { if (!ds || ds > todayStr()) return; persist(); loadDraft(ds); UI.attOpen = false; UI.coOpen = false; render(); window.scrollTo(0, 0); }
+
+document.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (!b) return;
+  if (b.classList.contains('sheet-bg') && e.target !== b) return; const f = ACT[b.dataset.act]; if (f) f(b, e); });
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.id === 'dateInput') { gotoDate(el.value); return; }
+  if (el.dataset.leg) { D.trip.legs[+el.dataset.leg].start = el.value; sortLegs(); edited(); renderMain(); renderFoot(); return; }
+  if (el.dataset.att) { D.attendance[el.dataset.att] = el.value; edited(); renderMain(); renderFoot(); return; }
+  if (el.dataset.f === 'start' || el.dataset.f === 'end') { D.tasks[+el.dataset.i][el.dataset.f] = el.value; edited(); renderSummary(); renderFoot(); }
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.f === 'note') { D.tasks[+el.dataset.i].note = el.value; edited(); renderFoot(); }
+  else if (el.dataset.g === 'statusNote') { D.statusNote = el.value; edited(); renderFoot(); }
+  else if (el.dataset.inc) { D.incidents[el.dataset.inc] = el.value; edited(); renderFoot(); }
+});
+
+/* ---------- 再送のきっかけ（iPhoneはバックグラウンド送信ができないため） ---------- */
+window.addEventListener('online', () => flushOutbox());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') { if (D) persist(); return; }
+  if (Date.now() - cfgLoadedAt > 10 * 60 * 1000) loadConfig(false);
+  if (D && D.date !== todayStr() && !D.dirty && !hasContent(D)) { loadDraft(todayStr()); render(); }
+  else if (D) renderTop();
+  flushOutbox();
+});
+window.addEventListener('pagehide', () => { if (D) persist(); });
+setInterval(() => { const ob = store.get('outbox', []); if (Array.isArray(ob) && ob.length) flushOutbox(); }, 60000);
+
+/* ---------- 起動 ---------- */
+(function boot() {
+  LANG = store.get('lang', 'id') === 'ja' ? 'ja' : 'id';
+  cleanupOldDrafts();
+  if (ME && workerById(ME) && workerById(ME).type === 'trainee') loadDraft(todayStr()); else ME = null;
+  render();
+  loadConfig(false);
+  flushOutbox();
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
