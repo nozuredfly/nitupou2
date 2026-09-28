@@ -2,7 +2,7 @@
   "version": "2026-09-20-trainee-r3-work-ot-brk",
   "_memo": "作業員・圃場・作業を変更したら version を上げてください。サマータイムの終業と休憩時刻は仮の値です。",
   "companyName": "re:zenith 新鮮組",
-  "gasUrl": "",
+  "gasUrl": "https://script.google.com/macros/s/AKfycbz9PTKp9OCQL1RPefNqfAOkY4odoUJSwUm1qOUy6qb2dfHjVs1TflVVdqoH0bDGHdWH/exec",
   "unclassWarnMin": 15,
   "fillMaxMin": 30,
   "trip": {
