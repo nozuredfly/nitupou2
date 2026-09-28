@@ -1,0 +1,328 @@
+{
+  "version": "2026-09-20-trainee-r3-work-ot-brk",
+  "_memo": "作業員・圃場・作業を変更したら version を上げてください。サマータイムの終業と休憩時刻は仮の値です。",
+  "companyName": "re:zenith 新鮮組",
+  "gasUrl": "",
+  "unclassWarnMin": 15,
+  "fillMaxMin": 30,
+  "trip": {
+    "legMin": 20,
+    "mode": "work",
+    "replaceBreaks": [],
+    "partial": {
+      "breakName": "午後休憩",
+      "travelMin": 20,
+      "fromLeg": "last"
+    },
+    "_memo": "mode: work=移動は労働時間（現在のルール）／add=休憩に追加／replace=休憩の代わり／partial=一部を休憩に充てる"
+  },
+  "closingDay": 15,
+  "schedules": {
+    "normal": {
+      "label": "通常勤務",
+      "label_id": "Normal",
+      "start": "08:00",
+      "end": "17:00",
+      "breaks": [
+        {
+          "name": "午前休憩",
+          "s": "10:00",
+          "e": "10:30",
+          "rule": {
+            "trainee": {
+              "type": "deduct"
+            },
+            "general": {
+              "type": "paid",
+              "min": 15
+            }
+          }
+        },
+        {
+          "name": "昼休憩",
+          "s": "12:00",
+          "e": "13:00",
+          "rule": {
+            "trainee": {
+              "type": "deduct"
+            },
+            "general": {
+              "type": "deduct"
+            }
+          }
+        },
+        {
+          "name": "午後休憩",
+          "s": "15:00",
+          "e": "15:30",
+          "rule": {
+            "trainee": {
+              "type": "deduct"
+            },
+            "general": {
+              "type": "paid",
+              "min": 15
+            }
+          }
+        }
+      ]
+    },
+    "summer": {
+      "label": "サマータイム",
+      "label_id": "Musim panas",
+      "start": "05:00",
+      "end": "14:00",
+      "breaks": [
+        {
+          "name": "午前休憩",
+          "s": "07:00",
+          "e": "07:30",
+          "rule": {
+            "trainee": {
+              "type": "deduct"
+            },
+            "general": {
+              "type": "paid",
+              "min": 15
+            }
+          }
+        },
+        {
+          "name": "昼休憩",
+          "s": "09:00",
+          "e": "10:00",
+          "rule": {
+            "trainee": {
+              "type": "deduct"
+            },
+            "general": {
+              "type": "deduct"
+            }
+          }
+        },
+        {
+          "name": "午後休憩",
+          "s": "12:00",
+          "e": "12:30",
+          "rule": {
+            "trainee": {
+              "type": "deduct"
+            },
+            "general": {
+              "type": "paid",
+              "min": 15
+            }
+          }
+        }
+      ]
+    }
+  },
+  "workers": [
+    {
+      "id": "W001",
+      "name": "野副",
+      "type": "general"
+    },
+    {
+      "id": "W002",
+      "name": "田中",
+      "type": "general"
+    },
+    {
+      "id": "W003",
+      "name": "ブディ",
+      "type": "trainee"
+    }
+  ],
+  "fieldCats": [
+    {
+      "id": "圃場",
+      "label": "圃場",
+      "label_id": "Sawah",
+      "icon": "🌾"
+    },
+    {
+      "id": "ハウス",
+      "label": "ハウス",
+      "label_id": "Rumah kaca",
+      "icon": "🏠"
+    },
+    {
+      "id": "倉庫",
+      "label": "倉庫",
+      "label_id": "Gudang",
+      "icon": "🏚"
+    }
+  ],
+  "fields": [
+    {
+      "id": "F-S1",
+      "name": "南1",
+      "zone": "南",
+      "area": 30,
+      "cat": "圃場"
+    },
+    {
+      "id": "F-S2",
+      "name": "南2",
+      "zone": "南",
+      "area": 30,
+      "cat": "圃場"
+    },
+    {
+      "id": "F-S3",
+      "name": "南3",
+      "zone": "南",
+      "area": 25,
+      "cat": "圃場"
+    },
+    {
+      "id": "F-S4",
+      "name": "南4",
+      "zone": "南",
+      "area": 25,
+      "cat": "圃場"
+    },
+    {
+      "id": "F-S5",
+      "name": "南5",
+      "zone": "南",
+      "area": 40,
+      "cat": "圃場"
+    },
+    {
+      "id": "F-N1",
+      "name": "北1",
+      "zone": "北",
+      "area": 30,
+      "cat": "圃場"
+    },
+    {
+      "id": "F-N2",
+      "name": "北2",
+      "zone": "北",
+      "area": 30,
+      "cat": "圃場"
+    },
+    {
+      "id": "F-E1",
+      "name": "東1",
+      "zone": "東",
+      "area": 20,
+      "cat": "圃場"
+    },
+    {
+      "id": "H-01",
+      "name": "ハウス1",
+      "cat": "ハウス",
+      "zone": "ハウス",
+      "area": 5
+    },
+    {
+      "id": "H-02",
+      "name": "ハウス2",
+      "cat": "ハウス",
+      "zone": "ハウス",
+      "area": 5
+    },
+    {
+      "id": "P-WACHI",
+      "name": "和地倉庫",
+      "cat": "倉庫",
+      "zone": "和地",
+      "area": 0
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T01",
+      "name": "稲刈り",
+      "name_id": "Panen padi"
+    },
+    {
+      "id": "T02",
+      "name": "田植え",
+      "name_id": "Tanam padi"
+    },
+    {
+      "id": "T03",
+      "name": "代かき",
+      "name_id": "Meratakan sawah"
+    },
+    {
+      "id": "T04",
+      "name": "耕起",
+      "name_id": "Membajak"
+    },
+    {
+      "id": "T05",
+      "name": "草刈り",
+      "name_id": "Potong rumput"
+    },
+    {
+      "id": "T06",
+      "name": "水管理",
+      "name_id": "Mengatur air"
+    },
+    {
+      "id": "T07",
+      "name": "防除",
+      "name_id": "Penyemprotan"
+    },
+    {
+      "id": "T08",
+      "name": "施肥",
+      "name_id": "Pemupukan"
+    },
+    {
+      "id": "T09",
+      "name": "乾燥調製",
+      "name_id": "Pengeringan"
+    },
+    {
+      "id": "T10",
+      "name": "野菜管理",
+      "name_id": "Perawatan sayur"
+    },
+    {
+      "id": "T12",
+      "name": "機械整備",
+      "name_id": "Perawatan mesin"
+    },
+    {
+      "id": "T90",
+      "name": "移動・準備",
+      "name_id": "Pindah/Persiapan",
+      "noField": true,
+      "filler": true
+    },
+    {
+      "id": "T99",
+      "name": "その他",
+      "name_id": "Lainnya"
+    }
+  ],
+  "overtime": {
+    "unit": 30,
+    "round": "ceil"
+  },
+  "breakPicker": {
+    "am": "午前休憩",
+    "pm": "午後休憩",
+    "optionsByType": {
+      "general": [
+        15,
+        0
+      ],
+      "trainee": [
+        30,
+        0
+      ]
+    },
+    "default": {
+      "trainee": 30,
+      "general": 15
+    },
+    "_memo": "休憩は決めた長さか「取れなかった（理由必須）」の2択"
+  }
+}

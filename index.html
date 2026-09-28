@@ -87,6 +87,8 @@ textarea{width:100%;min-height:80px;font:inherit;font-size:17px;border:2px solid
 .blabel{margin:0 0 6px;font-size:17px;font-weight:700}
 .blabel span{margin-left:8px;font-size:14px;font-weight:600;color:var(--muted)}
 .bmin{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.bmin2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.breason{border-color:var(--alert)}
 .bmin .chip{min-height:48px;padding:0 4px;font-size:16px}
 .tripq{margin-top:12px;padding:12px;border-radius:12px;background:var(--sora);border:2px solid transparent}
 .tripq.need{border-color:var(--alert);background:var(--alert-soft)}
@@ -187,7 +189,7 @@ const LS = 'nippoT:';   // 同じ github.io 上の他アプリと保存領域を
 const DEFAULT_CONFIG = {
   version: 'builtin-2026-09-20',
   companyName: 're:zenith 新鮮組',
-  gasUrl: 'https://script.google.com/macros/s/AKfycbz9PTKp9OCQL1RPefNqfAOkY4odoUJSwUm1qOUy6qb2dfHjVs1TflVVdqoH0bDGHdWH/exec',
+  gasUrl: '',
   unclassWarnMin: 15,
   fillMaxMin: 30,      // これより長い空きは「移動・準備」で自動では埋めない
   // 遠方（車で移動）：研修生は行き・帰りの移動時間を休憩として扱う。一般作業員（運転）は作業時間（移動・準備）
@@ -218,7 +220,8 @@ const DEFAULT_CONFIG = {
   // 残業：終業時刻を過ぎた分を、30分単位で切り上げ（夕方の休憩なし）
   overtime: { unit: 30, round: 'ceil' },
   // その日に選べる休憩（設定_休憩 の休憩名と合わせる）
-  breakPicker: { am: '午前休憩', pm: '午後休憩', options: [15, 20, 30, 0], default: { trainee: 30, general: 15 } },
+  // 休憩は「決めた長さを必ず取る」か「なし（理由を書く）」の2択
+  breakPicker: { am: '午前休憩', pm: '午後休憩', optionsByType: { general: [15, 0], trainee: [30, 0] }, default: { trainee: 30, general: 15 } },
   // 場所の種類（タブ）。fields の cat と同じ名前にする。cat が無い場所は「圃場」
   fieldCats: [
     { id: '圃場', label: '圃場', label_id: 'Sawah', icon: '🌾' },
@@ -271,7 +274,7 @@ const I18N = {
     lang:'言語', reloadCfg:'会社設定を再読込', retryNow:'今すぐ再送', done:'決定', zoneAll:'区域全部', frequent:'よく使う',
     close:'閉じる', schedule:'勤務形態', trainee:'研修生', general:'一般作業員', cfgLoaded:'スプレッドシートの設定を読み込みました', cfgSheet:'設定：スプレッドシート', cfgFileSrc:'設定：config.json', cfgFail:'会社設定を読み込めませんでした（前回の設定で動きます）',
     storageFull:'端末の保存領域がいっぱいです', unknownPlace:'（登録外）', minU:'分', hourU:'時間', rev:'第{n}版', otherPending:'他に送信待ち {n}件',
-    recorded:'計上', breaks:'今日の休憩', overtime:'残業', otNote:'{f}〜{o}（実際は{r}分。{u}分単位で切り上げ）', noBreak:'なし', breakNotice:'今日の{b}は {n}分（{s}〜{e}）です', breakNone:'今日は現場での{b}はありません', breakSub:'いつもは{o}分。{c}分は車の中で休憩した扱いです', tripPartial:'移動のうち{n}分を「{b}」として扱います。残りの移動は作業時間です', tripQ:'今日、車で移動しましたか？', yes:'はい', no:'いいえ', depart:'出発', legMove:'移動', legAdd:'＋ 移動を追加', driver:'運転した人', errTripQ:'「車で移動しましたか？」に答えてください', warnTripOut:'勤務時間外の移動が{d}あります', title:'作業日報（研修生）', trip:'遠方（車で移動）', tripOut:'行き', tripBack:'帰り', tripOneWay:'片道{n}分', tripTrainee:'移動時間は労働時間（作業時間）として記録します', tripDriver:'運転は作業時間（移動・準備）として記録します', legendTrip:'車移動', errTrip:'車移動の出発時刻を確認してください', legendWork:'作業', legendBreak:'休憩（引く）', legendPaid:'休憩（引かない）', legendGap:'未分類', legendOut:'計上外', absentNote:'欠勤の連絡事項'
+    recorded:'計上', breaks:'今日の休憩', overtime:'残業', otNote:'{f}〜{o}（実際は{r}分。{u}分単位で切り上げ）', noBreak:'取れなかった', whyNoBreak:'{b}が取れなかった理由（必須）', errBreakReason:'{b}が取れなかった理由を書いてください', breakNotice:'今日の{b}は {n}分（{s}〜{e}）です', breakNone:'今日は現場での{b}はありません', breakSub:'いつもは{o}分。{c}分は車の中で休憩した扱いです', tripPartial:'移動のうち{n}分を「{b}」として扱います。残りの移動は作業時間です', tripQ:'今日、車で移動しましたか？', yes:'はい', no:'いいえ', depart:'出発', legMove:'移動', legAdd:'＋ 移動を追加', driver:'運転した人', errTripQ:'「車で移動しましたか？」に答えてください', warnTripOut:'勤務時間外の移動が{d}あります', title:'作業日報（研修生）', trip:'遠方（車で移動）', tripOut:'行き', tripBack:'帰り', tripOneWay:'片道{n}分', tripTrainee:'移動時間は労働時間（作業時間）として記録します', tripDriver:'運転は作業時間（移動・準備）として記録します', legendTrip:'車移動', errTrip:'車移動の出発時刻を確認してください', legendWork:'作業', legendBreak:'休憩（引く）', legendPaid:'休憩（引かない）', legendGap:'未分類', legendOut:'計上外', absentNote:'欠勤の連絡事項'
   },
   id: {
     today:'Hari ini', notToday:'Bukan hari ini', status_normal:'Normal', status_late:'Terlambat', status_early:'Pulang awal', status_absent:'Tidak masuk',
@@ -291,7 +294,7 @@ const I18N = {
     lang:'Bahasa', reloadCfg:'Muat ulang pengaturan', retryNow:'Kirim ulang sekarang', done:'Selesai', zoneAll:'Semua area', frequent:'Sering dipakai',
     close:'Tutup', schedule:'Jadwal', trainee:'Magang', general:'Pekerja umum', cfgLoaded:'Pengaturan dari spreadsheet dimuat', cfgSheet:'Pengaturan: spreadsheet', cfgFileSrc:'Pengaturan: config.json', cfgFail:'Gagal memuat pengaturan (pakai yang lama)',
     storageFull:'Memori HP penuh', unknownPlace:'(tidak terdaftar)', minU:' menit', hourU:' jam ', rev:'versi {n}', otherPending:'{n} lainnya menunggu kirim',
-    recorded:'dihitung', breaks:'Istirahat hari ini', overtime:'Lembur', otNote:'{f}–{o} (sebenarnya {r} menit, dibulatkan ke atas per {u} menit)', noBreak:'Tidak ada', breakNotice:'Istirahat sore hari ini {n} menit ({s}–{e})', breakNone:'Hari ini tidak ada istirahat sore di lokasi', breakSub:'Biasanya {o} menit. {c} menit dihitung istirahat di mobil', tripPartial:'{n} menit perjalanan dihitung sebagai istirahat sore. Sisa perjalanan dihitung kerja', tripQ:'Hari ini naik mobil ke lokasi?', yes:'Ya', no:'Tidak', depart:'Berangkat', legMove:'Perjalanan', legAdd:'＋ Tambah perjalanan', driver:'Yang menyetir', errTripQ:'Jawab pertanyaan "naik mobil"', warnTripOut:'Ada perjalanan di luar jam kerja {d}', title:'Laporan Kerja (Magang)', trip:'Jauh (naik mobil)', tripOut:'Pergi', tripBack:'Pulang', tripOneWay:'Sekali jalan {n} menit', tripTrainee:'Waktu perjalanan dihitung sebagai jam kerja', tripDriver:'Menyetir dicatat sebagai kerja (Pindah/Persiapan)', legendTrip:'Naik mobil', errTrip:'Periksa jam berangkat mobil', legendWork:'Kerja', legendBreak:'Istirahat (dipotong)', legendPaid:'Istirahat (tidak dipotong)', legendGap:'Belum dicatat', legendOut:'Tidak dihitung', absentNote:'Keterangan tidak masuk'
+    recorded:'dihitung', breaks:'Istirahat hari ini', overtime:'Lembur', otNote:'{f}–{o} (sebenarnya {r} menit, dibulatkan ke atas per {u} menit)', noBreak:'Tidak bisa', whyNoBreak:'Alasan tidak bisa istirahat (wajib)', errBreakReason:'Tulis alasan tidak bisa istirahat', breakNotice:'Istirahat sore hari ini {n} menit ({s}–{e})', breakNone:'Hari ini tidak ada istirahat sore di lokasi', breakSub:'Biasanya {o} menit. {c} menit dihitung istirahat di mobil', tripPartial:'{n} menit perjalanan dihitung sebagai istirahat sore. Sisa perjalanan dihitung kerja', tripQ:'Hari ini naik mobil ke lokasi?', yes:'Ya', no:'Tidak', depart:'Berangkat', legMove:'Perjalanan', legAdd:'＋ Tambah perjalanan', driver:'Yang menyetir', errTripQ:'Jawab pertanyaan "naik mobil"', warnTripOut:'Ada perjalanan di luar jam kerja {d}', title:'Laporan Kerja (Magang)', trip:'Jauh (naik mobil)', tripOut:'Pergi', tripBack:'Pulang', tripOneWay:'Sekali jalan {n} menit', tripTrainee:'Waktu perjalanan dihitung sebagai jam kerja', tripDriver:'Menyetir dicatat sebagai kerja (Pindah/Persiapan)', legendTrip:'Naik mobil', errTrip:'Periksa jam berangkat mobil', legendWork:'Kerja', legendBreak:'Istirahat (dipotong)', legendPaid:'Istirahat (tidak dipotong)', legendGap:'Belum dicatat', legendOut:'Tidak dihitung', absentNote:'Keterangan tidak masuk'
   }
 };
 let LANG = 'id';
@@ -368,7 +371,9 @@ async function loadConfig(manual) {
 const workerById = id => CFG.workers.find(w => w.id === id) || null;
 const fieldById = id => CFG.fields.find(f => f.id === id) || null;
 function breakPicker() { const b = CFG.breakPicker || {}; return { am: b.am || '午前休憩', pm: b.pm || '午後休憩',
-  options: Array.isArray(b.options) && b.options.length ? b.options : [15, 20, 30, 0], default: b.default || { trainee: 30, general: 15 } }; }
+  optionsByType: b.optionsByType || { general: [15, 0], trainee: [30, 0] }, default: b.default || { trainee: 30, general: 15 } }; }
+function breakOptions(type) { const o = breakPicker().optionsByType || {}; const list = o[type === 'trainee' ? 'trainee' : 'general'];
+  return Array.isArray(list) && list.length ? list : (type === 'trainee' ? [30, 0] : [15, 0]); }
 function defaultBreakMin(type) { const d = breakPicker().default; const v = Number(d[type === 'trainee' ? 'trainee' : 'general']); return isFinite(v) ? v : (type === 'trainee' ? 30 : 15); }
 const catOf = f => (f && f.cat) || '圃場';
 function fieldCats() {   // 設定にあるタブ＋場所に書かれているのに設定に無い種類も自動で出す
@@ -394,7 +399,7 @@ function newDraft(date, wid) {
   const sch = CFG.schedules[sk];
   return { v: 2, reportId: uid(), date, workerId: wid, schedule: sk,
     attendance: { status: 'normal', in: sch.start, out: sch.end }, statusNote: '',
-    coworkers: [], tasks: [], breaks: { am: null, pm: null }, trip: { answered: false, on: false, legs: [], driverId: '' }, incOn: { damage: false, machine: false, fieldchg: false, otherrep: false }, incidents: { damage: '', machine: '', fieldchg: '', otherrep: '' },
+    coworkers: [], tasks: [], breaks: { am: null, pm: null, amNote: '', pmNote: '' }, trip: { answered: false, on: false, legs: [], driverId: '' }, incOn: { damage: false, machine: false, fieldchg: false, otherrep: false }, incidents: { damage: '', machine: '', fieldchg: '', otherrep: '' },
     revision: 0, confirmedRevision: 0, sentHash: '', dirty: false, updatedAt: Date.now() };
 }
 function normalizeDraft(d, date, wid) {
@@ -407,7 +412,7 @@ function normalizeDraft(d, date, wid) {
   if (!['normal','late','early','absent'].includes(out.attendance.status)) out.attendance.status = 'normal';
   const bpick = (d.breaks && typeof d.breaks === 'object') ? d.breaks : {};
   const okMin = v => { const n = Number(v); return isFinite(n) && n >= 0 && n <= 120 ? n : null; };
-  out.breaks = { am: okMin(bpick.am), pm: okMin(bpick.pm) };
+  out.breaks = { am: okMin(bpick.am), pm: okMin(bpick.pm), amNote: typeof bpick.amNote === 'string' ? bpick.amNote : '', pmNote: typeof bpick.pmNote === 'string' ? bpick.pmNote : '' };
   out.coworkers = Array.isArray(d.coworkers) ? d.coworkers.filter(x => typeof x === 'string') : [];
   out.tasks = (Array.isArray(d.tasks) ? d.tasks : []).filter(x => x && typeof x === 'object').map(x => ({
     id: x.id || uid(), typeId: typeof x.typeId === 'string' ? x.typeId : null,
@@ -628,9 +633,11 @@ function renderMain() {
   if (!absent) {
     const bp = breakPicker(); const w0 = workerById(D.workerId); const ty = w0 && w0.type === 'trainee' ? 'trainee' : 'general';
     const cur = k => D.breaks[k] == null ? defaultBreakMin(ty) : D.breaks[k];
+    const opts = breakOptions(ty);
     const row = (k, name) => { const b = (sch.breaks || []).find(x => x.name === name);
-      return `<div class="brow"><p class="blabel">${esc(name)}${b ? `<span>${esc(b.s)} ごろ</span>` : ''}</p><div class="chips bmin">` +
-        bp.options.map(m => `<button class="chip ${cur(k) === m ? 'on' : ''}" data-act="brk" data-k="${k}" data-v="${m}">${m > 0 ? m + (LANG === 'id' ? 'm' : '分') : t('noBreak')}</button>`).join('') + `</div></div>`; };
+      return `<div class="brow"><p class="blabel">${esc(name)}${b ? `<span>${esc(b.s)} ごろ</span>` : ''}</p><div class="chips bmin bmin2">` +
+        opts.map(m => `<button class="chip ${cur(k) === m ? 'on' : ''}" data-act="brk" data-k="${k}" data-v="${m}">${m > 0 ? m + (LANG === 'id' ? 'm' : '分') : t('noBreak')}</button>`).join('') + `</div>` +
+        (cur(k) === 0 ? `<textarea class="breason" data-bnote="${k}" placeholder="${t('whyNoBreak', { b: name })}">${esc(D.breaks[k + 'Note'] || '')}</textarea>` : '') + `</div>`; };
     h += `<div class="breaks"><p class="btitle">${t('breaks')}</p>${row('am', bp.am)}${row('pm', bp.pm)}</div>`;
   }
   if (st !== 'normal') h += `<textarea data-g="statusNote" placeholder="${absent ? t('absentNote') : t('reason')}">${esc(D.statusNote)}</textarea>`;
@@ -779,6 +786,11 @@ function validate() {
   if (D.attendance.status === 'absent') return [];
   const c = computeDay(D); const e = [];
   if (c.errors.includes('att')) e.push(t('errAtt'));
+  const bpv = breakPicker(), tyv = (workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general';
+  [['am', bpv.am], ['pm', bpv.pm]].forEach(([k, nm]) => {
+    const v = D.breaks[k] == null ? defaultBreakMin(tyv) : D.breaks[k];
+    if (v === 0 && !String(D.breaks[k + 'Note'] || '').trim()) e.push(t('errBreakReason', { b: nm }));
+  });
   if (!D.tasks.length) e.push(t('errNoTask'));
   if (!D.trip.answered) e.push(t('errTripQ'));
   else if (D.trip.on && (!D.trip.legs.length || tripLegs(D).length < D.trip.legs.length)) e.push(t('errTrip'));
@@ -800,8 +812,8 @@ function buildPayload(c) {
     attendance: { status: D.attendance.status, in: absent ? '' : D.attendance.in, out: absent ? '' : D.attendance.out,
       effectiveIn: c.span ? toHM(c.span[0]) : '', note: D.statusNote },
     overtime: (o => ({ fromTime: o.from, actualMin: o.raw, payMin: o.rounded, unit: o.unit, round: (CFG.overtime || {}).round === 'floor' ? 'floor' : 'ceil' }))(overtimeOf(D)),
-    breaks: { am: D.breaks.am == null ? defaultBreakMin((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general') : D.breaks.am,
-      pm: D.breaks.pm == null ? defaultBreakMin((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general') : D.breaks.pm },
+    breaks: (ty => ({ am: D.breaks.am == null ? defaultBreakMin(ty) : D.breaks.am, pm: D.breaks.pm == null ? defaultBreakMin(ty) : D.breaks.pm,
+      amReason: D.breaks.amNote || '', pmReason: D.breaks.pmNote || '' }))((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general'),
     coworkers: D.coworkers.map(id => ({ id, name: (workerById(id) || { name: id }).name })),
     trip: D.trip.on && !absent ? { on: true, rule: tripMode() === 'partial' ? 'trainee-partial' : tripMode() === 'work' ? 'trainee-work' : 'trainee-break', breakMin: tripSplit(D).breakMin, legs: D.trip.legs.map(l => { const s = toMin(l.start); return { start: l.start, min: Number(l.min), end: s == null ? '' : toHM(s + Number(l.min)).padStart(5, '0') }; }),
       driver: D.trip.driverId ? { id: D.trip.driverId, name: (workerById(D.trip.driverId) || { name: D.trip.driverId }).name } : null } : { on: false, answered: !!D.trip.answered },
@@ -882,7 +894,9 @@ function lineTextJa() {
   else {
     if (D.attendance.status !== 'normal') L.push(`${I18N.ja['status_' + D.attendance.status]}：${D.statusNote}`);
     { const o = overtimeOf(D); if (o.rounded > 0) L.push(`🕔 残業 ${toHM(o.rounded)}（${o.from}〜${D.attendance.out}／実際 ${o.raw}分・${o.unit}分単位で切り上げ）`); }
-    L.push(`休憩 午前${D.breaks.am == null ? defaultBreakMin((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general') : D.breaks.am}分／午後${D.breaks.pm == null ? defaultBreakMin((workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general') : D.breaks.pm}分`);
+    { const ty2 = (workerById(ME) || {}).type === 'trainee' ? 'trainee' : 'general';
+      const am = D.breaks.am == null ? defaultBreakMin(ty2) : D.breaks.am, pm = D.breaks.pm == null ? defaultBreakMin(ty2) : D.breaks.pm;
+      L.push(`休憩 午前${am > 0 ? am + '分' : 'なし（' + (D.breaks.amNote || '') + '）'}／午後${pm > 0 ? pm + '分' : 'なし（' + (D.breaks.pmNote || '') + '）'}`); }
     L.push(`勤務 ${D.attendance.in}〜${D.attendance.out}（勤怠 ${toHM(c.attendMin)}／作業 ${toHM(c.workMin)}／未分類 ${toHM(c.unclassMin)}）`);
     D.tasks.forEach((x, i) => { const tk = taskById(x.typeId); const pl = x.fieldIds.map(id => (fieldById(id) || { name: id }).name).join('・');
       L.push(`${i + 1}. ${x.start}-${x.end} ${pl} ${tk ? tk.name : ''}${x.note ? '（' + x.note + '）' : ''}`); });
@@ -975,6 +989,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => {
   const el = e.target;
+  if (el.dataset.bnote) { D.breaks[el.dataset.bnote + 'Note'] = el.value; edited(); renderFoot(); return; }
   if (el.dataset.f === 'note') { D.tasks[+el.dataset.i].note = el.value; edited(); renderFoot(); }
   else if (el.dataset.g === 'statusNote') { D.statusNote = el.value; edited(); renderFoot(); }
   else if (el.dataset.inc) { D.incidents[el.dataset.inc] = el.value; edited(); renderFoot(); }
