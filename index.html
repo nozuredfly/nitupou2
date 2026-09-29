@@ -151,6 +151,17 @@ details.memo summary{min-height:40px;display:flex;align-items:center;color:var(-
   padding:16px 16px calc(16px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
 .sheet-in{max-width:640px;margin:0 auto}
 .sheet h3{margin:0 0 12px;font-size:19px}
+.zlist{margin-top:10px}
+.zrow{display:flex;align-items:center;gap:10px;width:100%;min-height:60px;margin-bottom:8px;padding:0 14px;border:2px solid var(--line);border-radius:12px;background:#fff;text-align:left}
+.zrow b{flex:1;font-size:19px;color:var(--tsuchi)}
+.zrow span{font-size:14px;color:var(--muted)}
+.zrow i{min-width:26px;height:26px;border-radius:13px;background:var(--wara);color:var(--tsuchi);font-style:normal;font-size:14px;font-weight:700;line-height:26px;text-align:center}
+.zrow em{font-style:normal;font-size:22px;color:var(--muted)}
+.zhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.zhead h3{flex:1;margin:0}
+.zback{min-height:44px;border:0;background:none;color:var(--ta);font-size:17px;font-weight:700;padding:0 4px}
+.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.fgrid .chip{min-height:60px;padding:0 4px;font-size:18px}
 .cattabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;position:sticky;top:-16px;background:#fff;padding:4px 0 8px;z-index:1}
 .cattab{min-height:52px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:17px;font-weight:700;position:relative}
 .cattab.on{background:var(--ta);border-color:var(--ta);color:#fff}
@@ -271,7 +282,7 @@ const I18N = {
     errWho:'名前を選んでください', confirmUnclass:'記録のない時間が{d}あります。このまま送信しますか？',
     noChange:'変更がないため送信しませんでした', queued:'送信待ちに入れました', noUrl:'送信先が未設定です（config.json の gasUrl）',
     unsentDay:'{d} の日報が未送信です', open:'開く', whoAreYou:'あなたの名前を選んでください', settings:'設定', changeName:'名前を変更',
-    lang:'言語', reloadCfg:'会社設定を再読込', retryNow:'今すぐ再送', done:'決定', zoneAll:'区域全部', frequent:'よく使う',
+    lang:'言語', reloadCfg:'会社設定を再読込', retryNow:'今すぐ再送', done:'決定', zoneAll:'区域全部', frequent:'よく使う', back:'区域', places:'か所',
     close:'閉じる', schedule:'勤務形態', trainee:'研修生', general:'一般作業員', cfgLoaded:'スプレッドシートの設定を読み込みました', cfgSheet:'設定：スプレッドシート', cfgFileSrc:'設定：config.json', cfgFail:'会社設定を読み込めませんでした（前回の設定で動きます）',
     storageFull:'端末の保存領域がいっぱいです', unknownPlace:'（登録外）', minU:'分', hourU:'時間', rev:'第{n}版', otherPending:'他に送信待ち {n}件',
     recorded:'計上', breaks:'今日の休憩', overtime:'残業', otNote:'{f}〜{o}（実際は{r}分。{u}分単位で切り上げ）', noBreak:'取れなかった', whyNoBreak:'{b}が取れなかった理由（必須）', errBreakReason:'{b}が取れなかった理由を書いてください', breakNotice:'今日の{b}は {n}分（{s}〜{e}）です', breakNone:'今日は現場での{b}はありません', breakSub:'いつもは{o}分。{c}分は車の中で休憩した扱いです', tripPartial:'移動のうち{n}分を「{b}」として扱います。残りの移動は作業時間です', tripQ:'今日、車で移動しましたか？', yes:'はい', no:'いいえ', depart:'出発', legMove:'移動', legAdd:'＋ 移動を追加', driver:'運転した人', errTripQ:'「車で移動しましたか？」に答えてください', warnTripOut:'勤務時間外の移動が{d}あります', title:'作業日報（研修生）', trip:'遠方（車で移動）', tripOut:'行き', tripBack:'帰り', tripOneWay:'片道{n}分', tripTrainee:'移動時間は労働時間（作業時間）として記録します', tripDriver:'運転は作業時間（移動・準備）として記録します', legendTrip:'車移動', errTrip:'車移動の出発時刻を確認してください', legendWork:'作業', legendBreak:'休憩（引く）', legendPaid:'休憩（引かない）', legendGap:'未分類', legendOut:'計上外', absentNote:'欠勤の連絡事項'
@@ -291,7 +302,7 @@ const I18N = {
     errWho:'Pilih nama Anda', confirmUnclass:'Ada waktu belum dicatat {d}. Tetap kirim?',
     noChange:'Tidak ada perubahan, tidak dikirim', queued:'Masuk antrean kirim', noUrl:'Tujuan kirim belum diatur (gasUrl)',
     unsentDay:'Laporan {d} belum terkirim', open:'Buka', whoAreYou:'Pilih nama Anda', settings:'Pengaturan', changeName:'Ganti nama',
-    lang:'Bahasa', reloadCfg:'Muat ulang pengaturan', retryNow:'Kirim ulang sekarang', done:'Selesai', zoneAll:'Semua area', frequent:'Sering dipakai',
+    lang:'Bahasa', reloadCfg:'Muat ulang pengaturan', retryNow:'Kirim ulang sekarang', done:'Selesai', zoneAll:'Semua area', frequent:'Sering dipakai', back:'Area', places:' lokasi',
     close:'Tutup', schedule:'Jadwal', trainee:'Magang', general:'Pekerja umum', cfgLoaded:'Pengaturan dari spreadsheet dimuat', cfgSheet:'Pengaturan: spreadsheet', cfgFileSrc:'Pengaturan: config.json', cfgFail:'Gagal memuat pengaturan (pakai yang lama)',
     storageFull:'Memori HP penuh', unknownPlace:'(tidak terdaftar)', minU:' menit', hourU:' jam ', rev:'versi {n}', otherPending:'{n} lainnya menunggu kirim',
     recorded:'dihitung', breaks:'Istirahat hari ini', overtime:'Lembur', otNote:'{f}–{o} (sebenarnya {r} menit, dibulatkan ke atas per {u} menit)', noBreak:'Tidak bisa', whyNoBreak:'Alasan tidak bisa istirahat (wajib)', errBreakReason:'Tulis alasan tidak bisa istirahat', breakNotice:'Istirahat sore hari ini {n} menit ({s}–{e})', breakNone:'Hari ini tidak ada istirahat sore di lokasi', breakSub:'Biasanya {o} menit. {c} menit dihitung istirahat di mobil', tripPartial:'{n} menit perjalanan dihitung sebagai istirahat sore. Sisa perjalanan dihitung kerja', tripQ:'Hari ini naik mobil ke lokasi?', yes:'Ya', no:'Tidak', depart:'Berangkat', legMove:'Perjalanan', legAdd:'＋ Tambah perjalanan', driver:'Yang menyetir', errTripQ:'Jawab pertanyaan "naik mobil"', warnTripOut:'Ada perjalanan di luar jam kerja {d}', title:'Laporan Kerja (Magang)', trip:'Jauh (naik mobil)', tripOut:'Pergi', tripBack:'Pulang', tripOneWay:'Sekali jalan {n} menit', tripTrainee:'Waktu perjalanan dihitung sebagai jam kerja', tripDriver:'Menyetir dicatat sebagai kerja (Pindah/Persiapan)', legendTrip:'Naik mobil', errTrip:'Periksa jam berangkat mobil', legendWork:'Kerja', legendBreak:'Istirahat (dipotong)', legendPaid:'Istirahat (tidak dipotong)', legendGap:'Belum dicatat', legendOut:'Tidak dihitung', absentNote:'Keterangan tidak masuk'
@@ -752,19 +763,30 @@ function renderSheet() {
       `<div class="gap10"></div><div class="chips"><button class="chip ${LANG === 'ja' ? 'on' : ''}" data-act="lang" data-v="ja">日本語</button><button class="chip ${LANG === 'id' ? 'on' : ''}" data-act="lang" data-v="id">Bahasa Indonesia</button></div>`;
   } else if (s.kind === 'field') {
     const usage = store.get('usage', {}); const fu = usage.fields || {};
-    const freq = CFG.fields.filter(f => fu[f.id]).sort((a, b) => fu[b.id] - fu[a.id]).slice(0, 6);
     const chip = f => `<button class="chip ${s.sel.includes(f.id) ? 'on' : ''}" data-act="fieldToggle" data-v="${f.id}">${esc(f.name)}</button>`;
-    h = `<h3>${t('pickPlace')}</h3>`;
-    if (freq.length) h += `<div class="zone"><b>${t('frequent')}</b></div><div class="chips">${freq.map(chip).join('')}</div>`;
     const cats = fieldCats();
     if (!s.cat || !cats.some(c => c.id === s.cat)) { const f0 = fieldById(s.sel[0]); s.cat = f0 ? catOf(f0) : (cats[0] || {}).id; }
-    if (cats.length > 1) h += `<div class="cattabs">${cats.map(c => { const n = CFG.fields.filter(f => catOf(f) === c.id && s.sel.includes(f.id)).length;
-      return `<button class="cattab ${s.cat === c.id ? 'on' : ''}" data-act="fieldCat" data-v="${esc(c.id)}">${c.icon || ''} ${esc(catLabel(c))}${n ? `<i>${n}</i>` : ''}</button>`; }).join('')}</div>`;
     const inCat = CFG.fields.filter(f => catOf(f) === s.cat);
-    const zones = [...new Set(inCat.map(f => f.zone || '—'))];
-    zones.forEach(z => { const fs = inCat.filter(f => (f.zone || '—') === z); const all = fs.every(f => s.sel.includes(f.id));
-      h += `<div class="zone"><b>${esc(z)}</b>${fs.length > 1 ? `<button class="chip ${all ? 'on' : ''}" data-act="zoneAll" data-v="${esc(s.cat + '|' + z)}">${esc(z)} ${t('zoneAll')}</button>` : ''}</div><div class="chips">${fs.map(chip).join('')}</div>`; });
-    s.sel.filter(id => !fieldById(id)).forEach(id => { h += `<div class="kv">${esc(id)} ${t('unknownPlace')}</div>`; });
+    const zonesOf = () => [...new Set(inCat.map(f => f.zone || '—'))];
+    if (s.zone) {
+      // ② 区域の中の番号を選ぶ
+      const fs = inCat.filter(f => (f.zone || '—') === s.zone);
+      const all = fs.length > 1 && fs.every(f => s.sel.includes(f.id));
+      h = `<div class="zhead"><button class="zback" data-act="zoneBack">‹ ${t('back')}</button><h3>${esc(s.zone)}</h3>` +
+        (fs.length > 1 ? `<button class="chip ${all ? 'on' : ''}" data-act="zoneAll" data-v="${esc(s.cat + '|' + s.zone)}">${t('zoneAll')}</button>` : '') + `</div>`;
+      h += `<div class="fgrid">${fs.map(chip).join('')}</div>`;
+    } else {
+      // ① 種類のタブ ＋ よく使う ＋ 区域の一覧
+      h = `<h3>${t('pickPlace')}</h3>`;
+      if (cats.length > 1) h += `<div class="cattabs">${cats.map(c => { const n = CFG.fields.filter(f => catOf(f) === c.id && s.sel.includes(f.id)).length;
+        return `<button class="cattab ${s.cat === c.id ? 'on' : ''}" data-act="fieldCat" data-v="${esc(c.id)}">${c.icon || ''} ${esc(catLabel(c))}${n ? `<i>${n}</i>` : ''}</button>`; }).join('')}</div>`;
+      const freq = CFG.fields.filter(f => fu[f.id] && catOf(f) === s.cat).sort((a, b) => fu[b.id] - fu[a.id]).slice(0, 6);
+      if (freq.length) h += `<p class="gtitle">${t('frequent')}</p><div class="chips">${freq.map(chip).join('')}</div>`;
+      h += `<div class="zlist">` + zonesOf().map(z => { const fs = inCat.filter(f => (f.zone || '—') === z);
+        const n = fs.filter(f => s.sel.includes(f.id)).length;
+        return `<button class="zrow" data-act="zoneOpen" data-v="${esc(z)}"><b>${esc(z)}</b><span>${fs.length}${t('places')}</span>${n ? `<i>${n}</i>` : ''}<em>›</em></button>`; }).join('') + `</div>`;
+      s.sel.filter(id => !fieldById(id)).forEach(id => { h += `<div class="kv">${esc(id)} ${t('unknownPlace')}</div>`; });
+    }
     h += `<div class="sheet-foot"><button class="btn solid full" data-act="fieldDone">${t('done')}</button></div>`;
   } else if (s.kind === 'settings') {
     const ob = store.get('outbox', []);
@@ -946,11 +968,13 @@ const ACT = {
     if ((x.typeId || x.fieldIds.length) && !confirm(`${t('task')} ${i + 1}${tk ? '（' + tk.name + '）' : ''} を${t('del')}？`)) return;
     D.tasks.splice(i, 1); edited(); renderMain(); renderFoot(); },
   taskType: b => { const x = D.tasks[+b.dataset.i]; x.typeId = b.dataset.v; edited(); renderMain(); renderFoot();
-    const tk = taskById(x.typeId); if (!(tk && tk.noField) && !x.fieldIds.length) openSheet({ kind: 'field', i: +b.dataset.i, sel: [] }); },
+    const tk = taskById(x.typeId); if (!(tk && tk.noField) && !x.fieldIds.length) openSheet({ kind: 'field', i: +b.dataset.i, sel: [], zone: null }); },
   moreTasks: b => { const x = D.tasks[+b.dataset.i]; UI.more[x.id] = !UI.more[x.id]; renderMain(); },
-  pickField: b => { const i = +b.dataset.i; openSheet({ kind: 'field', i, sel: D.tasks[i].fieldIds.slice() }); },
+  pickField: b => { const i = +b.dataset.i; openSheet({ kind: 'field', i, sel: D.tasks[i].fieldIds.slice(), zone: null }); },
   fieldToggle: b => { const s = UI.sheet, v = b.dataset.v; const k = s.sel.indexOf(v); if (k >= 0) s.sel.splice(k, 1); else s.sel.push(v); renderSheet(); },
-  fieldCat: b => { UI.sheet.cat = b.dataset.v; renderSheet(); },
+  fieldCat: b => { UI.sheet.cat = b.dataset.v; UI.sheet.zone = null; renderSheet(); },
+  zoneOpen: b => { UI.sheet.zone = b.dataset.v; renderSheet(); },
+  zoneBack: () => { UI.sheet.zone = null; renderSheet(); },
   zoneAll: b => { const s = UI.sheet, [c, z] = b.dataset.v.split('|'); const ids = CFG.fields.filter(f => catOf(f) === c && (f.zone || '—') === z).map(f => f.id);
     const all = ids.every(id => s.sel.includes(id)); s.sel = all ? s.sel.filter(id => !ids.includes(id)) : [...new Set(s.sel.concat(ids))]; renderSheet(); },
   fieldDone: () => { const s = UI.sheet; if (D.tasks[s.i]) { D.tasks[s.i].fieldIds = s.sel.slice(); edited(); } UI.sheet = null; $('#sheetRoot').innerHTML = ''; renderMain(); renderFoot(); },
