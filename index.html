@@ -90,6 +90,9 @@ textarea{width:100%;min-height:80px;font:inherit;font-size:17px;border:2px solid
 .bmin2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .breason{border-color:var(--alert)}
 .bmin .chip{min-height:48px;padding:0 4px;font-size:16px}
+.attfix{margin:0;padding:12px 14px;border-radius:12px;background:var(--sora)}
+.attfix b{display:block;font-size:18px}
+.attfix span{display:block;margin-top:4px;font-size:14px;color:var(--muted)}
 .tripq{margin-top:12px;padding:12px;border-radius:12px;background:var(--sora);border:2px solid transparent}
 .tripq.need{border-color:var(--alert);background:var(--alert-soft)}
 .tripq>b{display:block;font-size:18px;margin-bottom:8px}
@@ -193,7 +196,9 @@ details.memo summary{min-height:40px;display:flex;align-items:center;color:var(-
    ・日報は全員が自分の分を提出（共同作業者は照合用の参考データ）
    ・outbox＋revision＋reportId で二重登録を防止
    ===================================================================== */
-const APP_VERSION = '2.2.0-trainee';
+const APP_VERSION = '2.5.0-trainee';
+// 研修生版：車移動の入力はなし／勤務は定時（8:00〜17:00）固定、残業はタイムカードで判断
+const TRIP_UI = false;
 const LS = 'nippoT:';   // 同じ github.io 上の他アプリと保存領域を分ける
 
 /* ---------- 会社設定の初期値（config.json があれば上書き） ---------- */
@@ -268,7 +273,7 @@ const DEFAULT_CONFIG = {
 const INC_TYPES = ['damage', 'machine', 'fieldchg', 'otherrep'];   // 会社への報告の種類
 const I18N = {
   ja: {
-    today:'今日', notToday:'今日ではありません', status_normal:'通常', status_late:'遅刻', status_early:'早退', status_absent:'欠勤',
+    today:'今日', otByCard:'残業はタイムカードの打刻で計算します', notToday:'今日ではありません', status_normal:'通常', status_late:'遅刻', status_early:'早退', status_absent:'欠勤',
     work_hours:'勤務', edit:'変更', in:'出勤', out:'退勤', reason:'理由', attend:'勤怠', work:'作業', unclass:'未分類',
     day:'今日の勤務', tasks:'今日の作業', addTask:'＋ 作業を追加', pickPlace:'場所を選ぶ', more:'他の作業', less:'閉じる',
     start:'開始', end:'終了', memo:'メモ', del:'削除', task:'作業', coworkers:'一緒に作業した人', none:'なし',
@@ -276,7 +281,7 @@ const I18N = {
     send:'今日の日報を送信', resend:'修正して再送信', sentOk:'送信しました', sentState:'送信済み', pendingState:'送信待ち',
     autoRetry:'電波が戻ると自動で送ります', changed:'変更あり・再送信してください', line:'LINEで送る（予備）',
     fillGap:'30分以内の空きを「移動・準備」で埋める', warnOverlap:'作業時間が{d}重なっています',
-    warnOutside:'勤務時間外の作業が{d}あります（勤怠には入りません）', warnBreak:'休憩時間中の作業が{d}あります（作業時間に入りません）',
+    warnOutside:'定時外の作業が{d}あります（残業はタイムカードの打刻で計算します）', warnBreak:'休憩時間中の作業が{d}あります（作業時間に入りません）',
     warnUnclass:'記録のない時間が{d}あります', errNoTask:'作業を1つ以上入力してください', errType:'作業{n}の作業内容を選んでください',
     errPlace:'作業{n}の場所を選んでください', errTime:'作業{n}の開始・終了時刻を確認してください', errAtt:'出勤・退勤の時刻を確認してください',
     errWho:'名前を選んでください', confirmUnclass:'記録のない時間が{d}あります。このまま送信しますか？',
@@ -288,7 +293,7 @@ const I18N = {
     recorded:'計上', breaks:'今日の休憩', overtime:'残業', otNote:'{f}〜{o}（実際は{r}分。{u}分単位で切り上げ）', noBreak:'取れなかった', whyNoBreak:'{b}が取れなかった理由（必須）', errBreakReason:'{b}が取れなかった理由を書いてください', breakNotice:'今日の{b}は {n}分（{s}〜{e}）です', breakNone:'今日は現場での{b}はありません', breakSub:'いつもは{o}分。{c}分は車の中で休憩した扱いです', tripPartial:'移動のうち{n}分を「{b}」として扱います。残りの移動は作業時間です', tripQ:'今日、車で移動しましたか？', yes:'はい', no:'いいえ', depart:'出発', legMove:'移動', legAdd:'＋ 移動を追加', driver:'運転した人', errTripQ:'「車で移動しましたか？」に答えてください', warnTripOut:'勤務時間外の移動が{d}あります', title:'作業日報（研修生）', trip:'遠方（車で移動）', tripOut:'行き', tripBack:'帰り', tripOneWay:'片道{n}分', tripTrainee:'移動時間は労働時間（作業時間）として記録します', tripDriver:'運転は作業時間（移動・準備）として記録します', legendTrip:'車移動', errTrip:'車移動の出発時刻を確認してください', legendWork:'作業', legendBreak:'休憩（引く）', legendPaid:'休憩（引かない）', legendGap:'未分類', legendOut:'計上外', absentNote:'欠勤の連絡事項'
   },
   id: {
-    today:'Hari ini', notToday:'Bukan hari ini', status_normal:'Normal', status_late:'Terlambat', status_early:'Pulang awal', status_absent:'Tidak masuk',
+    today:'Hari ini', otByCard:'Lembur dihitung dari kartu absen', notToday:'Bukan hari ini', status_normal:'Normal', status_late:'Terlambat', status_early:'Pulang awal', status_absent:'Tidak masuk',
     work_hours:'Jam kerja', edit:'Ubah', in:'Masuk', out:'Pulang', reason:'Alasan', attend:'Hadir', work:'Kerja', unclass:'Belum dicatat',
     day:'Kerja hari ini', tasks:'Pekerjaan hari ini', addTask:'＋ Tambah pekerjaan', pickPlace:'Pilih lokasi', more:'Lainnya', less:'Tutup',
     start:'Mulai', end:'Selesai', memo:'Catatan', del:'Hapus', task:'Kerja', coworkers:'Rekan kerja', none:'Tidak ada',
@@ -296,7 +301,7 @@ const I18N = {
     send:'Kirim laporan hari ini', resend:'Kirim ulang perubahan', sentOk:'Terkirim', sentState:'Terkirim', pendingState:'Menunggu kirim',
     autoRetry:'Akan dikirim otomatis saat sinyal kembali', changed:'Ada perubahan, kirim ulang', line:'Kirim lewat LINE (cadangan)',
     fillGap:'Isi waktu kosong ≤30 menit dengan "Pindah/Persiapan"', warnOverlap:'Waktu kerja tumpang tindih {d}',
-    warnOutside:'Ada kerja di luar jam kerja {d} (tidak dihitung hadir)', warnBreak:'Ada kerja saat istirahat {d} (tidak dihitung)',
+    warnOutside:'Ada kerja di luar jam tetap {d} (lembur dihitung dari kartu absen)', warnBreak:'Ada kerja saat istirahat {d} (tidak dihitung)',
     warnUnclass:'Ada waktu belum dicatat {d}', errNoTask:'Masukkan minimal 1 pekerjaan', errType:'Pilih jenis pekerjaan {n}',
     errPlace:'Pilih lokasi pekerjaan {n}', errTime:'Periksa jam mulai/selesai pekerjaan {n}', errAtt:'Periksa jam masuk/pulang',
     errWho:'Pilih nama Anda', confirmUnclass:'Ada waktu belum dicatat {d}. Tetap kirim?',
@@ -432,6 +437,8 @@ function normalizeDraft(d, date, wid) {
   const tr = (d.trip && typeof d.trip === 'object') ? d.trip : {};
   out.trip = { answered: !!tr.answered, on: !!tr.on, driverId: typeof tr.driverId === 'string' ? tr.driverId : '',
     legs: (Array.isArray(tr.legs) ? tr.legs : []).filter(l => l && typeof l === 'object').map(l => ({ id: l.id || uid(), start: typeof l.start === 'string' ? l.start : '', min: Number(l.min) || legDefault() })) };
+  if (!TRIP_UI) out.trip = { answered: true, on: false, legs: [], driverId: '' };
+  if (!TRIP_UI && out.attendance.status === 'normal') { const sc = CFG.schedules[out.schedule] || CFG.schedules.normal; if (sc) { out.attendance.in = sc.start; out.attendance.out = sc.end; } }
   out.incOn = Object.assign({ damage: false, machine: false, fieldchg: false, otherrep: false }, d.incOn || {});
   out.incidents = Object.assign({ damage: '', machine: '', fieldchg: '', otherrep: '' }, d.incidents || {});
   out.revision = Number(d.revision) || 0; out.confirmedRevision = Number(d.confirmedRevision) || 0;
@@ -615,7 +622,10 @@ function renderMain() {
   // 勤務
   h += `<section class="blk"><h2>${t('day')}</h2><div class="chips">` +
     ['normal','late','early','absent'].map(s => `<button class="chip ${s !== 'normal' ? 'alert' : ''} ${st === s ? 'on' : ''}" data-act="status" data-v="${s}">${t('status_' + s)}</button>`).join('') + `</div>`;
-  if (!absent) {
+  if (!absent && st === 'normal') {
+    h += `<div class="gap10"></div><p class="attfix"><b>${t('work_hours')} ${esc(D.attendance.in)}〜${esc(D.attendance.out)}</b><span>${t('otByCard')}</span></p>`;
+  }
+  if (!absent && st !== 'normal') {
     h += `<div class="gap10"></div><button class="attline" data-act="toggleAtt"><span>${t('work_hours')} ${esc(D.attendance.in)}〜${esc(D.attendance.out)}</span><em>${schedLabel(sch)}　${UI.attOpen ? '▲' : t('edit') + ' ▼'}</em></button>`;
     if (UI.attOpen) {
       h += `<div class="gap10"></div><div class="chips">` + Object.keys(CFG.schedules).map(k => `<button class="chip ${D.schedule === k ? 'on' : ''}" data-act="schedule" data-v="${k}">${esc(schedLabel(CFG.schedules[k]))}</button>`).join('') + `</div>
@@ -623,7 +633,7 @@ function renderMain() {
       <label class="f">${t('out')}<input type="time" step="300" data-att="out" value="${esc(D.attendance.out)}"></label></div>`;
     }
   }
-  if (!absent) {
+  if (!absent && TRIP_UI) {
     const tr = D.trip, n = tr.legs.length;
     h += `<div class="tripq ${tr.answered ? '' : 'need'}"><b>🚗 ${t('tripQ')}</b><div class="yn">
       <button class="chip ${tr.answered && !tr.on ? 'on' : ''}" data-act="tripNo">${t('no')}</button>
@@ -814,8 +824,8 @@ function validate() {
     if (v === 0 && !String(D.breaks[k + 'Note'] || '').trim()) e.push(t('errBreakReason', { b: nm }));
   });
   if (!D.tasks.length) e.push(t('errNoTask'));
-  if (!D.trip.answered) e.push(t('errTripQ'));
-  else if (D.trip.on && (!D.trip.legs.length || tripLegs(D).length < D.trip.legs.length)) e.push(t('errTrip'));
+  if (TRIP_UI && !D.trip.answered) e.push(t('errTripQ'));
+  else if (TRIP_UI && D.trip.on && (!D.trip.legs.length || tripLegs(D).length < D.trip.legs.length)) e.push(t('errTrip'));
   D.tasks.forEach((x, i) => { const tk = taskById(x.typeId);
     if (!x.typeId) e.push(t('errType', { n: i + 1 }));
     else if (!(tk && tk.noField) && !x.fieldIds.length) e.push(t('errPlace', { n: i + 1 }));
@@ -949,7 +959,7 @@ const ACT = {
   prevDay: () => gotoDate(addDays(D.date, -1)),
   nextDay: () => { if (D.date < todayStr()) gotoDate(addDays(D.date, 1)); },
   gotoDate: b => gotoDate(b.dataset.date),
-  status: b => { const v = b.dataset.v; D.attendance.status = v;
+  status: b => { const v = b.dataset.v; D.attendance.status = v; UI.attOpen = false;
     const sch = CFG.schedules[D.schedule];
     if (v === 'normal') { D.attendance.in = sch.start; D.attendance.out = sch.end; }
     UI.attOpen = (v === 'late' || v === 'early'); edited(); render(); },
